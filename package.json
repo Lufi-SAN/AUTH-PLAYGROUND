@@ -1,0 +1,52 @@
+{
+  "name": "auth-playground",
+  "version": "1.0.0",
+  "description": "A minimal auth service",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node dist/server.js",
+    "dev:watch": "tsx watch src/server.ts",
+    "build": "tsc",
+    "dev": "npm run validate && npm run dev:watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --write .",
+    "validate": "npm run lint && npm run format"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lufi-SAN/AUTH-PLAYGROUND.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Lufi-SAN/AUTH-PLAYGROUND/issues"
+  },
+  "homepage": "https://github.com/Lufi-SAN/AUTH-PLAYGROUND#readme",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.8.0",
+    "@types/pg": "^8.20.0",
+    "eslint": "^10.4.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.6.0",
+    "jiti": "^2.7.0",
+    "prettier": "^3.8.3",
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.59.3"
+  },
+  "dependencies": {
+    "@node-rs/argon2": "^2.0.2",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jose": "^6.2.2",
+    "pg": "^8.20.0",
+    "redis": "^5.11.0",
+    "uuidv4": "^6.2.13",
+    "zod": "^4.4.3"
+  }
+}
