@@ -2,15 +2,18 @@ import { createApp } from './app.js'
 import { appConfig } from './config/app.js'
 import { loadPostgres } from './loaders/loadPostgres.js'
 import { loadRedis } from './loaders/loadRedis.js'
+import { registerProcessHandlers } from './lifecycle/processHandlers.js'
 
 async function startServer() {
-  await loadPostgres()
-  await loadRedis()
+  const pg = await loadPostgres()
+  const redis = await loadRedis()
   const app = createApp()
 
   const server = app.listen(appConfig.port, () => {
-    console.log(`Server is running on port 3000`)
+    console.log(`Server is running on port ${appConfig.port}`)
   })
+
+  registerProcessHandlers({ server, pg, redis })
 }
 
 startServer()
