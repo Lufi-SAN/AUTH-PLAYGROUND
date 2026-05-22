@@ -9,14 +9,14 @@ export async function loadPostgres() {
     connectionString: pg_url,
   })
 
-  //test the connection with retry
-  await testWithRetry(() => pool.query('SELECT 1'), { name: 'PostgreSQL' })
-
   //pg instance listeners
   pool.on('error', (err) => {
     console.error('Unexpected error on idle PostgreSQL client', err)
     process.exit(-1)
   })
+
+  //test the connection with retry
+  await testWithRetry(() => pool.query('SELECT 1'), { name: 'PostgreSQL' })
 
   return pool
 }

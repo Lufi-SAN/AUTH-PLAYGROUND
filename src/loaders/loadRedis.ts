@@ -6,6 +6,7 @@ export async function loadRedis() {
   const { redis_url } = redisConfig
 
   const redisClient = createClient({ url: redis_url })
+
   redisClient.on('error', (err) => {
     console.error('Unexpected error on Redis client', err)
     process.exit(-1)
@@ -16,3 +17,5 @@ export async function loadRedis() {
 
   return redisClient
 }
+
+export type MyRedisClientType = ReturnType<typeof createClient>
