@@ -27,6 +27,7 @@
   "homepage": "https://github.com/Lufi-SAN/AUTH-PLAYGROUND#readme",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/node": "^25.8.0",
     "@types/pg": "^8.20.0",
@@ -41,8 +42,10 @@
   },
   "dependencies": {
     "@node-rs/argon2": "^2.0.2",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "helmet": "^8.1.0",
     "jose": "^6.2.2",
     "pg": "^8.20.0",
     "redis": "^5.11.0",
