@@ -1,16 +1,23 @@
-import express, { type Express } from 'express'
-// import { appConfig } from './config/app.js'
+import express from 'express'
+import helmet from 'helmet'
+import cookieParser from 'cookie-parser'
+import { appConfig } from './config/app.js'
+import { loadRouter } from './loaders/loadRouter.js'
 
 export function createApp() {
-  const app: Express = express()
+  const app = express()
 
   //express instance settings/config
   app.disable('x-powered-by')
 
   //express instance listeners (all routes)
+  app.use(helmet())
   app.use(express.json())
+  app.use(cookieParser())
 
+  const v1Router = loadRouter()
   //express instance listeners (routes)
+  app.use('/api/v1', v1Router)
 
   //listener for unhandled routes
   app.use((req, res) => {
