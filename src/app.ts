@@ -2,7 +2,8 @@ import express from 'express'
 import helmet from 'helmet'
 import cookieParser from 'cookie-parser'
 import { appConfig } from './config/app.js'
-import { loadRouter } from './loaders/loadRouter.js'
+import { loadRouter } from './loaders/LOADER_SINK.js'
+import { globalErrorHandler } from './api/middleware/MIDDLEWARE_SINK.js'
 
 export function createApp() {
   const app = express()
@@ -25,10 +26,7 @@ export function createApp() {
   })
 
   //listener for global errors
-  app.use((err: Error, req: express.Request, res: express.Response) => {
-    console.error('Global error handler:', err)
-    res.status(500).json({ error: 'Internal Server Error' })
-  })
+  app.use(globalErrorHandler)
 
   //return the express instance
   return app

@@ -1,9 +1,10 @@
 import { Router } from 'express'
+import { registerRoute } from '../api/routes/ROUTE_SINK.js'
 
 export function loadRouter() {
   const router = Router()
 
-  router.use('/register')
+  router.use('/register', registerRoute())
   router.use('/login')
   router.use('/profile')
   router.use('/refresh')
