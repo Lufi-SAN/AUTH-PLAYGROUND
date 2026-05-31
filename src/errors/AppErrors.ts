@@ -3,6 +3,7 @@ import { type DomainErrorType } from '../types/user.types.js'
 
 class BadRequestError extends DomainError implements DomainErrorType {
   constructor(
+    public detail: string,
     public readonly message = 'HTTP Error' as const,
     public readonly status = 400 as const,
     public readonly title = 'Bad Request' as const,
@@ -15,6 +16,7 @@ class InvalidUserFormCredentials
   implements DomainErrorType
 {
   constructor(
+    public detail: string,
     public readonly message = 'HTTP Error' as const,
     public readonly status = 422 as const,
     public readonly title = 'Unprocessable Content' as const,
@@ -24,6 +26,7 @@ class InvalidUserFormCredentials
 }
 class InvalidLoginCredentials extends DomainError implements DomainErrorType {
   constructor(
+    public detail: string,
     public readonly message = 'HTTP Error' as const,
     public readonly status = 401 as const,
     public readonly title = 'Unauthorized' as const,
@@ -33,6 +36,7 @@ class InvalidLoginCredentials extends DomainError implements DomainErrorType {
 }
 class UserAlreadyExists extends DomainError implements DomainErrorType {
   constructor(
+    public detail: string,
     public readonly message = 'HTTP Error' as const,
     public readonly status = 409 as const,
     public readonly title = 'Conflict' as const,
@@ -42,6 +46,7 @@ class UserAlreadyExists extends DomainError implements DomainErrorType {
 }
 class UnauthorizedUser extends DomainError implements DomainErrorType {
   constructor(
+    public detail: string,
     public readonly message = 'HTTP Error' as const,
     public readonly status = 401 as const,
     public readonly title = 'Unauthorized' as const,
@@ -51,6 +56,7 @@ class UnauthorizedUser extends DomainError implements DomainErrorType {
 }
 class TooManyAttempts extends DomainError implements DomainErrorType {
   constructor(
+    public detail: string,
     public readonly message = 'HTTP Error' as const,
     public readonly status = 429 as const,
     public readonly title = 'Too Many Requests' as const,

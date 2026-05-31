@@ -26,4 +26,5 @@ export interface DomainErrorType extends Error {
   message: 'HTTP Error'
   status: number
   title: string
+  detail: string
 }
