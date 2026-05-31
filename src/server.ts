@@ -1,7 +1,7 @@
-import { createApp } from './app.js'
 import { appConfig } from './config/app.js'
 import { loadPostgres, loadRedis } from './loaders/LOADER_SINK.js'
 import { registerProcessHandlers } from './lifecycle/processHandlers.js'
+import { createApp } from './app.js'
 
 async function startServer() {
   const pg = await loadPostgres()

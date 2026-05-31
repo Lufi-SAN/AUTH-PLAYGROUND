@@ -19,7 +19,7 @@ export function globalErrorHandler(
   if ('status' in err && isDomainError(err)) {
     const status = err.status
     const title = err.title
-    const detail = res.locals.errDetail
+    const detail = err.detail
 
     return res.json(errorResponse(status, title, detail, path))
   }
