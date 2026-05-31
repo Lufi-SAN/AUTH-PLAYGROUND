@@ -3,7 +3,10 @@ import helmet from 'helmet'
 import cookieParser from 'cookie-parser'
 import { appConfig } from './config/app.js'
 import { loadRouter } from './loaders/LOADER_SINK.js'
-import { globalErrorHandler } from './api/middleware/MIDDLEWARE_SINK.js'
+import {
+  globalErrorHandler,
+  notFoundHandler,
+} from './api/middleware/MIDDLEWARE_SINK.js'
 
 export function createApp() {
   const app = express()
@@ -21,9 +24,7 @@ export function createApp() {
   app.use('/api/v1', v1Router)
 
   //listener for unhandled routes
-  app.use((req, res) => {
-    res.status(404).json({ error: 'Route not found' })
-  })
+  app.use(notFoundHandler)
 
   //listener for global errors
   app.use(globalErrorHandler)
