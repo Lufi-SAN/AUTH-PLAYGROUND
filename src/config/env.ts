@@ -7,6 +7,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().nonempty(),
   REDIS_URL: z.string().nonempty(),
   APP_DOMAIN: z.string().nonempty(),
+  OWASP_ARGON2_MEMORY_COST: z.coerce.number().default(19456),
 })
 
 export const env = envSchema.parse(process.env)
