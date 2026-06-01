@@ -3,16 +3,11 @@ export async function testWithRetry(
   options: {
     retries?: number
     delay?: number
-    name: 'PostgreSQL' | 'Redis'
+    name: 'PostgreSQL' | 'Redis' | 'SMTP'
+    fileName: '[loadPostgres.ts]' | '[loadRedis.ts]' | '[loadMailer.ts]'
   },
 ) {
-  const { retries = 5, delay = 2000, name } = options
-  let fileName: string
-  if (name === 'PostgreSQL') {
-    fileName = '[loadPostgres.ts]'
-  } else {
-    fileName = '[loadRedis.ts]'
-  }
+  const { retries = 5, delay = 2000, name, fileName } = options
 
   for (let i = 0; i < retries; i++) {
     try {

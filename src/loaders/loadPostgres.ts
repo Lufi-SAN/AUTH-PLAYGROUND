@@ -18,7 +18,10 @@ export async function loadPostgres() {
   })
 
   //test the connection with retry
-  await testWithRetry(() => pool.query('SELECT 1'), { name: 'PostgreSQL' })
+  await testWithRetry(() => pool.query('SELECT 1'), {
+    name: 'PostgreSQL',
+    fileName: '[loadPostgres.ts]',
+  })
 
   poolInstance = pool
   return pool

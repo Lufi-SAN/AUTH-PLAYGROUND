@@ -15,7 +15,10 @@ export async function loadRedis() {
   })
 
   //test the connection with retry
-  await testWithRetry(() => redisClient.connect(), { name: 'Redis' })
+  await testWithRetry(() => redisClient.connect(), {
+    name: 'Redis',
+    fileName: '[loadRedis.ts]',
+  })
 
   redisInstance = redisClient
   return redisClient
