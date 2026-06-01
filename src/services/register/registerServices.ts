@@ -43,7 +43,7 @@ async function saveNewUser(
 async function redisOTPHashSetup(id: string, otpHash: string) {
   const redisKey = redisKeys.emailVerificationOTP(id)
   await redis
-    .getRedis()
+    .getRedisInstance()
     .multi()
     .hSet(redisKey, {
       otpHash,

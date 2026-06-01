@@ -26,7 +26,7 @@ export async function loadMailer() {
 }
 
 export const mailer = {
-  getTransporter: () => {
+  getTransporterInstance: () => {
     if (!transporterInstance) {
       throw new Error('Mailer transporter not initialized')
     }

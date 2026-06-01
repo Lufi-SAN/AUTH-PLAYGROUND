@@ -25,7 +25,7 @@ export async function loadRedis() {
 }
 
 export const redis = {
-  getRedis: () => {
+  getRedisInstance: () => {
     if (!redisInstance) {
       throw new Error('Redis client not initialized')
     }

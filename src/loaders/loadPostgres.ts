@@ -34,7 +34,7 @@ export const db = {
     }
     return poolInstance.query(text, params)
   },
-  getPool: () => {
+  getPoolInstance: () => {
     if (!poolInstance) {
       throw new Error('PostgreSQL pool not initialized')
     }
