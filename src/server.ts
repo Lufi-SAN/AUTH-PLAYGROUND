@@ -13,7 +13,7 @@ async function startServer() {
     console.log(`Server is running on port ${appConfig.port}`)
   })
 
-  registerProcessHandlers({ server, pg, redis })
+  registerProcessHandlers({ server, pg, redis, mailer })
 }
 
 startServer()

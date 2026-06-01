@@ -1,13 +1,20 @@
-import type { Server, Pool, MyRedisClientType } from '../types/user.types.js'
+import type {
+  Server,
+  Pool,
+  MyRedisClientType,
+  MailerClientType,
+} from '../types/user.types.js'
 
 export async function registerProcessHandlers({
   server,
   pg,
   redis,
+  mailer,
 }: {
   server: Server
   pg: Pool
   redis: MyRedisClientType
+  mailer: MailerClientType
 }) {
   let isShuttingDown = false
 
@@ -25,6 +32,9 @@ export async function registerProcessHandlers({
       console.log('HTTP server closed.')
       try {
         await Promise.all([
+          Promise.resolve(mailer.close()).then(() =>
+            console.log('Mailer transporter closed.'),
+          ),
           pg.end().then(() => console.log('PostgreSQL connection closed.')),
           redis.quit().then(() => console.log('Redis connection closed.')),
         ])
