@@ -3,7 +3,7 @@ import type {
   Response,
   NextFunction,
 } from '../../../types/user.types.js'
-import { saveNewUser } from '../../../services/register/registerServices.js'
+import { registerUserOrchestration } from '../../../services/register/registerServices.js'
 import { successResponse } from '../../../utils/UTILS_SINK.js'
 
 export async function registerUser(
@@ -19,8 +19,12 @@ export async function registerUser(
       password: string
     }
 
-    //service call with pure js
-    const newUserData = await saveNewUser(username, email, password)
+    const newUserData = await registerUserOrchestration(
+      password,
+      username,
+      email,
+    )
+
     return res.json(
       successResponse('User registered successfully', newUserData),
     )
