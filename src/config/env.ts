@@ -8,6 +8,10 @@ const envSchema = z.object({
   REDIS_URL: z.string().nonempty(),
   APP_DOMAIN: z.string().nonempty(),
   OWASP_ARGON2_MEMORY_COST: z.coerce.number().default(19456),
+  SMTP_HOST: z.string().nonempty(),
+  SMTP_PORT: z.coerce.number().default(587),
+  SMTP_USER: z.string().nonempty(),
+  SMTP_PASSWORD: z.string().nonempty(),
 })
 
 export const env = envSchema.parse(process.env)
