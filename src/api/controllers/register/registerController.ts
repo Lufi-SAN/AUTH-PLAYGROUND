@@ -3,7 +3,7 @@ import type {
   Response,
   NextFunction,
 } from '../../../types/user.types.js'
-import { registerUserOrchestration } from '../../../services/register/registerServices.js'
+import { registerUserOrchestrator } from '../../../services/register/registerServices.js'
 import { successResponse } from '../../../utils/UTILS_SINK.js'
 
 export async function registerUser(
@@ -19,7 +19,7 @@ export async function registerUser(
       password: string
     }
 
-    const newUserData = await registerUserOrchestration(
+    const newUserData = await registerUserOrchestrator(
       password,
       username,
       email,

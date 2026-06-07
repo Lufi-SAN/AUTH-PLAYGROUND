@@ -61,7 +61,7 @@ async function sendOTPEmail(email: string, otp: string) {
   await enqueueOTPEmailJob(email, otp)
 }
 
-export async function registerUserOrchestration(
+export async function registerUserOrchestrator(
   password: string,
   username: string,
   email: string,
