@@ -1,5 +1,5 @@
 import { redisConfig } from '../config/redis.js'
-import { createClient } from 'redis'
+import { Redis } from 'ioredis'
 import { testWithRetry } from '../utils/testConnectionsWithRetry.js'
 
 let redisInstance: MyRedisClientType | null = null
@@ -7,7 +7,7 @@ let redisInstance: MyRedisClientType | null = null
 export async function loadRedis() {
   const { redis_url } = redisConfig
 
-  const redisClient = createClient({ url: redis_url })
+  const redisClient = new Redis(redis_url)
 
   redisClient.on('error', (err) => {
     console.error('Unexpected error on Redis client', err)
@@ -15,7 +15,7 @@ export async function loadRedis() {
   })
 
   //test the connection with retry
-  await testWithRetry(() => redisClient.connect(), {
+  await testWithRetry(() => redisClient.ping(), {
     name: 'Redis',
     fileName: '[loadRedis.ts]',
   })
@@ -27,10 +27,10 @@ export async function loadRedis() {
 export const redis = {
   getRedisInstance: () => {
     if (!redisInstance) {
-      throw new Error('Redis client not initialized')
+      throw new Error('Redis client not yet initialized')
     }
     return redisInstance
   },
 }
 
-export type MyRedisClientType = ReturnType<typeof createClient>
+export type MyRedisClientType = Redis

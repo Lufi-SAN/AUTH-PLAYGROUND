@@ -14,6 +14,8 @@ export async function loadMailer() {
       user: mailConfig.user,
       pass: mailConfig.password,
     },
+    logger: true,
+    debug: true,
   })
 
   await testWithRetry(() => transporter.verify(), {

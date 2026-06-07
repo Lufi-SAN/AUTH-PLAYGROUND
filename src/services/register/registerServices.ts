@@ -6,6 +6,7 @@ import { redisKeys } from '../../config/redis.js'
 import { DatabaseError } from 'pg'
 import { UserAlreadyExists } from '../../errors/AppErrors.js'
 import { redis } from '../../loaders/loadRedis.js'
+import { enqueueOTPEmailJob } from '../../jobs/enqueueOTPEmailJob.js'
 
 async function otpAndHash(password: string) {
   const otp = generateSecure6DigitString()
@@ -45,7 +46,7 @@ async function redisOTPHashSetup(id: string, otpHash: string) {
   await redis
     .getRedisInstance()
     .multi()
-    .hSet(redisKey, {
+    .hset(redisKey, {
       otpHash,
       attempts: '0',
     })
@@ -56,7 +57,8 @@ async function redisOTPHashSetup(id: string, otpHash: string) {
 async function sendOTPEmail(email: string, otp: string) {
   // Implement email sending logic here using your preferred email service provider
   // For example, you can use nodemailer or any transactional email service API
-  console.log(`Sending OTP ${otp} to email: ${email}`)
+  console.log('enqueuing')
+  await enqueueOTPEmailJob(email, otp)
 }
 
 export async function registerUserOrchestration(
@@ -71,6 +73,9 @@ export async function registerUserOrchestration(
 
   //service for redis
   await redisOTPHashSetup(newUserData.id, otpHash)
+
+  //service for email queue
+  await sendOTPEmail(email, otp)
 
   return newUserData
 }

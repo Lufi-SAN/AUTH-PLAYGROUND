@@ -1,0 +1,28 @@
+//Creating Queues
+import { Queue } from 'bullmq'
+import { Redis } from 'ioredis'
+
+let emailQueue: Queue | null = null
+
+export function loadQueues() {
+  const sharedQueueRedis = new Redis({
+    host: '127.0.0.1',
+    port: 6379,
+  })
+
+  const email = new Queue('emailQueue', {
+    connection: sharedQueueRedis as unknown as Queue['opts']['connection'],
+  }) //any job added to this queue goes to emailQueue worker
+
+  emailQueue = email
+}
+
+export const Queues = function () {
+  const queueArray = [emailQueue]
+  if (queueArray.includes(null)) {
+    throw new Error(`All queues not yet initialized: ${queueArray}`)
+  }
+  return {
+    emailQueue: emailQueue as Queue,
+  }
+}
