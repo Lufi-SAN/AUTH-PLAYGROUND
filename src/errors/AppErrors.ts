@@ -65,6 +65,28 @@ class TooManyAttempts extends DomainError implements DomainErrorType {
   }
 }
 
+class UserNotFound extends DomainError implements DomainErrorType {
+  constructor(
+    public detail: string,
+    public readonly message = 'HTTP Error' as const,
+    public readonly status = 404 as const,
+    public readonly title = 'Not Found' as const,
+  ) {
+    super()
+  }
+}
+
+class OtpNotFound extends DomainError implements DomainErrorType {
+  constructor(
+    public detail: string,
+    public readonly message = 'HTTP Error' as const,
+    public readonly status = 410 as const,
+    public readonly title = 'Gone' as const,
+  ) {
+    super()
+  }
+}
+
 export {
   BadRequestError,
   InvalidUserFormCredentials,
@@ -72,4 +94,6 @@ export {
   UserAlreadyExists,
   UnauthorizedUser,
   TooManyAttempts,
+  UserNotFound,
+  OtpNotFound,
 }

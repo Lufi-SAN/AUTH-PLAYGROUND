@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { sanitiserMiddleware } from '../middleware/MIDDLEWARE_SINK.js'
 import { registerSchema } from './schemas/SCHEMA_SINK.js'
-import { registerUser } from '../controllers/register/registerController.js'
+import { registerUser } from '../controllers/registerController.js'
 
 export function registerRoute() {
   const router = Router()

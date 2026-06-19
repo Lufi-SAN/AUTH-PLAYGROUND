@@ -1,12 +1,12 @@
-import { generateSecure6DigitString } from '../../utils/generateSecure6DigitString.js'
+import { generateSecure6DigitString } from '../utils/generateSecure6DigitString.js'
 import argon2id from '@node-rs/argon2'
-import { argon2Config } from '../../config/argon2.js'
-import { saveNewUserDB } from '../../repositories/register/registerRepo.js'
-import { redisKeys } from '../../config/redis.js'
+import { argon2Config } from '../config/argon2.js'
+import { saveNewUserDB } from '../repositories/registerRepo.js'
+import { redisKeys } from '../config/redis.js'
 import { DatabaseError } from 'pg'
-import { UserAlreadyExists } from '../../errors/AppErrors.js'
-import { redis } from '../../loaders/loadRedis.js'
-import { enqueueOTPEmailJob } from '../../jobs/enqueueOTPEmailJob.js'
+import { UserAlreadyExists } from '../errors/AppErrors.js'
+import { redis } from '../loaders/loadRedis.js'
+import { enqueueOTPEmailJob } from '../jobs/enqueueOTPEmailJob.js'
 
 async function otpAndHash(password: string) {
   const otp = generateSecure6DigitString()

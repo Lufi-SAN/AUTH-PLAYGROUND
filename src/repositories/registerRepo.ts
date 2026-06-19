@@ -1,4 +1,4 @@
-import { db } from '../../loaders/loadPostgres.js'
+import { db } from '../loaders/loadPostgres.js'
 
 export async function saveNewUserDB(
   username: string,

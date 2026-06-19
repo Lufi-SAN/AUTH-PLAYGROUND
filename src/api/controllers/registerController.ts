@@ -1,10 +1,6 @@
-import type {
-  Request,
-  Response,
-  NextFunction,
-} from '../../../types/user.types.js'
-import { registerUserOrchestrator } from '../../../services/register/registerServices.js'
-import { successResponse } from '../../../utils/UTILS_SINK.js'
+import type { Request, Response, NextFunction } from '../../types/user.types.js'
+import { registerUserOrchestrator } from '../../services/registerServices.js'
+import { successResponse } from '../../utils/UTILS_SINK.js'
 
 export async function registerUser(
   req: Request,
