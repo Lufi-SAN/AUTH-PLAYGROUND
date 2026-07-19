@@ -6,4 +6,4 @@ import { redisKeys } from '../../config/redis.js'
 import { redis } from '../../loaders/loadRedis.js'
 import { enqueueOTPEmailJob } from '../../jobs/enqueueOTPEmailJob.js'
 
-export function resendOtp(req: Request, res: Response) {}
+export function resendLink(req: Request, res: Response) {}

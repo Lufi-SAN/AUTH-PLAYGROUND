@@ -12,16 +12,17 @@ export type SanitiserInputType =
   | 'cookies'
   | 'headers'
 
-export function sanitiserMiddleware(
+export function sanitiserMiddleware<T extends z.ZodSchema>(
   inputType: SanitiserInputType,
-  schema: z.ZodSchema,
+  schema: T,
+  callback: (req: Request, parsedData: z.infer<T>) => void,
 ) {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       const inputData = req[inputType]
 
       const parsedData = sanitiser(inputData, schema) //op might throw
-      req.validatedData = parsedData as Record<string, unknown>
+      callback(req, parsedData)
 
       next()
     } catch (error) {
@@ -36,18 +37,18 @@ export function sanitiserMiddleware(
             issue.code === 'unrecognized_keys',
         )
         if (isStructural) {
-          res.locals.errDetail = 'Malformed request structure.'
-          return next(new BadRequestError())
+          return next(new BadRequestError('Malformed request structure.'))
         } else {
-          res.locals.errDetail = 'Invalid data format or content.'
-          return next(new InvalidUserFormCredentials())
+          return next(
+            new InvalidUserFormCredentials('Invalid data format or content.'),
+          )
         }
       }
     }
   }
 }
 
-function sanitiser(inputData: Record<string, unknown>, schema: z.ZodSchema) {
+function sanitiser<T extends z.ZodSchema>(inputData: z.infer<T>, schema: T) {
   const parsedData = schema.parse(inputData) //might throw if validation fails
   return parsedData
 }

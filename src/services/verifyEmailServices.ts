@@ -8,9 +8,21 @@ import {
   OtpNotFound,
   TooManyAttempts,
   UserNotFound,
+  VerificationEmailMismatch,
 } from '../errors/AppErrors.js'
 import argon2id from '@node-rs/argon2'
 import { argon2Config } from '../config/argon2.js'
+
+async function verifyEmail(emailHash: string, email: string) {
+  const verifiedEmail = await argon2id.verify(emailHash, email, {
+    memoryCost: argon2Config.memoryCost,
+  })
+  if (!verifiedEmail) {
+    throw new VerificationEmailMismatch(
+      'The provided email context does not match this verification link.',
+    )
+  }
+}
 
 async function getUserIdByEmail(email: string) {
   const result = await getUserIdByEmailDB(email)
@@ -70,10 +82,15 @@ async function updateUserVerificationStatus(
   userId: string,
   verificationResult: boolean,
 ) {
-  updateUserVerificationStatusDB(userId, verificationResult)
+  await updateUserVerificationStatusDB(userId, verificationResult)
 }
 
-export async function verifyEmailOrchestrator(otp: string, email: string) {
+export async function verifyEmailOrchestrator(
+  otp: string,
+  emailHash: string,
+  email: string,
+) {
+  await verifyEmail(emailHash, email)
   const { userId, isVerified } = await getUserIdByEmail(email)
   if (isVerified) {
     return { message: 'Email is already verified' }

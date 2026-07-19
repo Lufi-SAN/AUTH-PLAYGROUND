@@ -8,17 +8,20 @@ import { UserAlreadyExists } from '../errors/AppErrors.js'
 import { redis } from '../loaders/loadRedis.js'
 import { enqueueOTPEmailJob } from '../jobs/enqueueOTPEmailJob.js'
 
-async function otpAndHash(password: string) {
+async function otpAndHash(password: string, email: string) {
   const otp = generateSecure6DigitString()
-  const [passwordHash, otpHash] = await Promise.all([
+  const [passwordHash, otpHash, emailHash] = await Promise.all([
     argon2id.hash(password, {
       memoryCost: argon2Config.memoryCost,
     }),
     argon2id.hash(otp, {
       memoryCost: argon2Config.memoryCost,
     }),
+    argon2id.hash(email, {
+      memoryCost: argon2Config.memoryCost,
+    }),
   ])
-  return { passwordHash, otpHash, otp }
+  return { passwordHash, otpHash, emailHash, otp }
 }
 
 async function saveNewUser(
@@ -41,10 +44,10 @@ async function saveNewUser(
   }
 }
 
-async function redisOTPHashSetup(id: string, otpHash: string) {
-  const redisKey = redisKeys.emailVerificationOTP(id)
-  await redis
-    .getRedisInstance()
+export async function redisOTPHashSetup(emailHash: string, otpHash: string) {
+  const redisKey = redisKeys.emailVerificationOTP(emailHash)
+  const redisInstance = redis.getRedisInstance()
+  await redisInstance
     .multi()
     .hset(redisKey, {
       otpHash,
@@ -54,7 +57,7 @@ async function redisOTPHashSetup(id: string, otpHash: string) {
     .exec()
 }
 
-async function sendOTPEmail(email: string, otp: string) {
+export async function sendOTPEmail(email: string, otp: string) {
   // Implement email sending logic here using your preferred email service provider
   // For example, you can use nodemailer or any transactional email service API
   console.log('enqueuing')
@@ -66,13 +69,16 @@ export async function registerUserOrchestrator(
   username: string,
   email: string,
 ): Promise<{ id: string; username: string; email: string }> {
-  const { passwordHash, otpHash, otp } = await otpAndHash(password)
+  const { passwordHash, otpHash, emailHash, otp } = await otpAndHash(
+    password,
+    email,
+  )
 
   //service for db
   const newUserData = await saveNewUser(username, email, passwordHash)
 
   //service for redis
-  await redisOTPHashSetup(newUserData.id, otpHash)
+  await redisOTPHashSetup(emailHash, otpHash)
 
   //service for email queue
   await sendOTPEmail(email, otp)
