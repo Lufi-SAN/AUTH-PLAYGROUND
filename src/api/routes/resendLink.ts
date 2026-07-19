@@ -9,9 +9,9 @@ export function resendLinkRoute() {
   const router = Router()
 
   router.post(
-    '/:email',
+    '/',
     sanitiserMiddleware(
-      'params',
+      'body',
       resendLinkSchema,
       (req: Request, parsedData: z.infer<typeof resendLinkSchema>) => {
         req.validatedData = parsedData

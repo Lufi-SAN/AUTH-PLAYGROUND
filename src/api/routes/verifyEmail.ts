@@ -12,16 +12,9 @@ export function verifyEmailRoute() {
     '/:otp/:emailHash',
     sanitiserMiddleware(
       'params',
-      verifyEmailSchema.params,
-      (req: Request, parsedData: z.infer<typeof verifyEmailSchema.params>) => {
+      verifyEmailSchema,
+      (req: Request, parsedData: z.infer<typeof verifyEmailSchema>) => {
         req.validatedData = parsedData
-      },
-    ),
-    sanitiserMiddleware(
-      'body',
-      verifyEmailSchema.body,
-      (req: Request, parsedData: z.infer<typeof verifyEmailSchema.body>) => {
-        req.validatedData!.email = parsedData.email
       },
     ),
     verifyEmail,

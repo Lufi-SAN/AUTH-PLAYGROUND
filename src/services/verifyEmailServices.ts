@@ -1,102 +1,36 @@
 import { redisKeys } from '../config/redis.js'
 import { redis } from '../loaders/loadRedis.js'
-import {
-  getUserIdByEmailDB,
-  updateUserVerificationStatusDB,
-} from '../repositories/verifyEmailRepo.js'
-import {
-  OtpNotFound,
-  TooManyAttempts,
-  UserNotFound,
-  VerificationEmailMismatch,
-} from '../errors/AppErrors.js'
-import argon2id from '@node-rs/argon2'
-import { argon2Config } from '../config/argon2.js'
+import { updateUserVerificationStatusDB } from '../repositories/verifyEmailRepo.js'
+import { OtpNotFound } from '../errors/AppErrors.js'
 
-async function verifyEmail(emailHash: string, email: string) {
-  const verifiedEmail = await argon2id.verify(emailHash, email, {
-    memoryCost: argon2Config.memoryCost,
-  })
-  if (!verifiedEmail) {
-    throw new VerificationEmailMismatch(
-      'The provided email context does not match this verification link.',
-    )
-  }
-}
-
-async function getUserIdByEmail(email: string) {
-  const result = await getUserIdByEmailDB(email)
-  if (!result) {
-    throw new UserNotFound('No user found with email')
-  }
-  return result
-}
-
-async function checkRedisForOTPKey(userId: string) {
-  const luaScript = `
-    local otpHashValue = redis.call('HGET', KEYS[1], 'otpHash')
-    
-    if not otpHashValue then
-      return {"EXPIRED"}
-    end
-    
-    local currentAttempts = redis.call('HGET', KEYS[1], 'attempts')
-    
-    if currentAttempts and tonumber(currentAttempts) >= 5 then
-      return {"LOCKED"}
-    end
-    
-    local newAttempts = redis.call('HINCRBY', KEYS[1], 'attempts', 1)
-    
-    return {"OK", otpHashValue}
-    `
-
-  const redisKey = redisKeys.emailVerificationOTP(userId)
-  const [status, otpHashValue] = (await redis
-    .getRedisInstance()
-    .eval(luaScript, 1, redisKey)) as [string, string]
-
-  if (status === 'EXPIRED') {
+async function checkRedisForOTPKey(redisKey: string) {
+  const redisInstance = redis.getRedisInstance()
+  const email = await redisInstance.hget(redisKey, 'email')
+  if (!email) {
     throw new OtpNotFound('OTP invalid or missing')
   }
-  if (status === 'LOCKED') {
-    redis.getRedisInstance().del(redisKey)
-    throw new TooManyAttempts('Too many OTP attempts')
-  }
 
-  return otpHashValue
+  return email
 }
 
-async function verifyOTP(otpHashValue: string, otp: string) {
-  const verificationResult = await argon2id.verify(otpHashValue, otp, {
-    memoryCost: argon2Config.memoryCost,
-  })
-  if (!verificationResult) {
-    throw new OtpNotFound('OTP invalid')
-  }
-
-  return verificationResult
+async function updateUserVerificationStatus(email: string) {
+  return await updateUserVerificationStatusDB(email)
 }
 
-async function updateUserVerificationStatus(
-  userId: string,
-  verificationResult: boolean,
-) {
-  await updateUserVerificationStatusDB(userId, verificationResult)
+async function cleanRedis(redisKey: string) {
+  const redisInstance = redis.getRedisInstance()
+  await redisInstance.del(redisKey)
 }
 
 export async function verifyEmailOrchestrator(
   otp: string,
-  emailHash: string,
-  email: string,
-) {
-  await verifyEmail(emailHash, email)
-  const { userId, isVerified } = await getUserIdByEmail(email)
-  if (isVerified) {
-    return { message: 'Email is already verified' }
+): Promise<{ message: string }> {
+  const redisKey = redisKeys.emailVerificationOTP(otp)
+  const email = await checkRedisForOTPKey(redisKey)
+  const isVerified = await updateUserVerificationStatus(email)
+  if (!isVerified) {
+    throw new Error('Invalid or expired verification process.')
   }
-  const otpHash = await checkRedisForOTPKey(userId)
-  const validOTP = await verifyOTP(otpHash, otp)
-  await updateUserVerificationStatus(userId, validOTP)
+  await cleanRedis(redisKey)
   return { message: 'Email verified successfully' }
 }

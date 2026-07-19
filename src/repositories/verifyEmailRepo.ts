@@ -1,10 +1,10 @@
 import { db } from '../loaders/loadPostgres.js'
 
-export async function getUserIdByEmailDB(email: string) {
-  const query = `SELECT id, is_verified FROM users WHERE email = $1`
+export async function updateUserVerificationStatusDB(email: string) {
+  const query = `UPDATE users SET is_verified = true WHERE email = $1 AND is_verified = false RETURNING id, is_verified`
   const values = [email]
   const result = await db.query(query, values)
-  if (result.rowCount === 0) {
+  if (result.rows.length === 0) {
     return null
   } else {
     return {
@@ -12,13 +12,4 @@ export async function getUserIdByEmailDB(email: string) {
       isVerified: result.rows[0].is_verified as boolean,
     }
   }
-}
-
-export async function updateUserVerificationStatusDB(
-  userId: string,
-  verificationResult: boolean,
-) {
-  const query = `UPDATE users SET is_verified = $1 WHERE id = $2`
-  const values = [verificationResult, userId]
-  const result = await db.query(query, values)
 }

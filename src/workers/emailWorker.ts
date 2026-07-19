@@ -16,7 +16,7 @@ export function createEmailWorker() {
           from: '"Auth Playground" <onboarding@resend.dev>',
           to: email,
           subject: 'Your OTP Code',
-          html: `<h1>Hello! Here's your OTP Code. Made easy through a verification link </h1><p>Click here: <a href="${appConfig.appDomain}/verify-email/${otp}/${email}">Verify Email</a></p>`,
+          html: `<h1>Hello! Here's your OTP Code. Made easy through a verification link </h1><p>Click here: <a href="${appConfig.appDomain}/verify-email/${otp}">Verify Email</a></p>`,
         })
 
         console.log(`${appConfig.appDomain}/verify-email/${otp}/${email}`)

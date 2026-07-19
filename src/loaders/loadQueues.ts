@@ -3,6 +3,7 @@ import { Queue } from 'bullmq'
 import { Redis } from 'ioredis'
 
 let emailQueue: Queue | null = null
+let queueArray: (Queue | null)[] = []
 
 export function loadQueues() {
   const sharedQueueRedis = new Redis({
@@ -15,10 +16,10 @@ export function loadQueues() {
   }) //any job added to this queue goes to emailQueue worker
 
   emailQueue = email
+  queueArray = [emailQueue]
 }
 
 export const Queues = function () {
-  const queueArray = [emailQueue]
   if (queueArray.includes(null)) {
     throw new Error(`All queues not yet initialized: ${queueArray}`)
   }

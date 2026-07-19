@@ -8,13 +8,11 @@ export async function verifyEmail(
   next: NextFunction,
 ) {
   try {
-    const { otp, emailHash, email } = req.validatedData as {
+    const { otp } = req.validatedData as {
       otp: string
-      emailHash: string
-      email: string
     }
 
-    const { message } = await verifyEmailOrchestrator(otp, emailHash, email)
+    const { message } = await verifyEmailOrchestrator(otp)
 
     return res.json(successResponse(message))
   } catch (error) {

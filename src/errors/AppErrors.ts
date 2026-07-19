@@ -87,17 +87,6 @@ class OtpNotFound extends DomainError implements DomainErrorType {
   }
 }
 
-class VerificationEmailMismatch extends DomainError implements DomainErrorType {
-  constructor(
-    public detail: string,
-    public readonly message = 'HTTP Error' as const,
-    public readonly status = 403 as const,
-    public readonly title = 'Forbidden' as const,
-  ) {
-    super()
-  }
-}
-
 export {
   BadRequestError,
   InvalidUserFormCredentials,
@@ -107,5 +96,4 @@ export {
   TooManyAttempts,
   UserNotFound,
   OtpNotFound,
-  VerificationEmailMismatch,
 }

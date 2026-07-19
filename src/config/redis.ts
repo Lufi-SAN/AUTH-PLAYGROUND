@@ -11,8 +11,8 @@ export const REDIS_PREFIXES = {
 } as const
 
 export const redisKeys = {
-  emailVerificationOTP: (emailHash: string) =>
-    `${REDIS_PREFIXES.EMAIL_VERIFICATION_OTP}${emailHash}`,
+  emailVerificationOTP: (otp: string) =>
+    `${REDIS_PREFIXES.EMAIL_VERIFICATION_OTP}${otp}`,
   session: (sessionId: string) => `${REDIS_PREFIXES.SESSION}${sessionId}`,
   sessionIndex: (userId: string) => `${REDIS_PREFIXES.SESSION_INDEX}${userId}`,
 }

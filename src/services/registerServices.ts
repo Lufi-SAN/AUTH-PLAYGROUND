@@ -1,4 +1,4 @@
-import { generateSecure6DigitString } from '../utils/generateSecure6DigitString.js'
+import { generateSecure14DigitString } from '../utils/generateSecure14DigitString.js'
 import argon2id from '@node-rs/argon2'
 import { argon2Config } from '../config/argon2.js'
 import { saveNewUserDB } from '../repositories/registerRepo.js'
@@ -9,19 +9,11 @@ import { redis } from '../loaders/loadRedis.js'
 import { enqueueOTPEmailJob } from '../jobs/enqueueOTPEmailJob.js'
 
 async function otpAndHash(password: string, email: string) {
-  const otp = generateSecure6DigitString()
-  const [passwordHash, otpHash, emailHash] = await Promise.all([
-    argon2id.hash(password, {
-      memoryCost: argon2Config.memoryCost,
-    }),
-    argon2id.hash(otp, {
-      memoryCost: argon2Config.memoryCost,
-    }),
-    argon2id.hash(email, {
-      memoryCost: argon2Config.memoryCost,
-    }),
-  ])
-  return { passwordHash, otpHash, emailHash, otp }
+  const otp = generateSecure14DigitString()
+  const passwordHash = await argon2id.hash(password, {
+    memoryCost: argon2Config.memoryCost,
+  })
+  return { passwordHash, otp }
 }
 
 async function saveNewUser(
@@ -44,14 +36,13 @@ async function saveNewUser(
   }
 }
 
-export async function redisOTPHashSetup(emailHash: string, otpHash: string) {
-  const redisKey = redisKeys.emailVerificationOTP(emailHash)
+export async function redisOTPHashSetup(email: string, otp: string) {
+  const redisKey = redisKeys.emailVerificationOTP(otp)
   const redisInstance = redis.getRedisInstance()
   await redisInstance
-    .multi()
+    .pipeline()
     .hset(redisKey, {
-      otpHash,
-      attempts: '0',
+      email,
     })
     .expire(redisKey, 15 * 60)
     .exec()
@@ -60,7 +51,6 @@ export async function redisOTPHashSetup(emailHash: string, otpHash: string) {
 export async function sendOTPEmail(email: string, otp: string) {
   // Implement email sending logic here using your preferred email service provider
   // For example, you can use nodemailer or any transactional email service API
-  console.log('enqueuing')
   await enqueueOTPEmailJob(email, otp)
 }
 
@@ -69,16 +59,13 @@ export async function registerUserOrchestrator(
   username: string,
   email: string,
 ): Promise<{ id: string; username: string; email: string }> {
-  const { passwordHash, otpHash, emailHash, otp } = await otpAndHash(
-    password,
-    email,
-  )
+  const { passwordHash, otp } = await otpAndHash(password, email)
 
   //service for db
   const newUserData = await saveNewUser(username, email, passwordHash)
 
   //service for redis
-  await redisOTPHashSetup(emailHash, otpHash)
+  await redisOTPHashSetup(email, otp)
 
   //service for email queue
   await sendOTPEmail(email, otp)
