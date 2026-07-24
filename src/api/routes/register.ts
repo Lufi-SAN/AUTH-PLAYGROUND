@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { globalTrafficLimiter, IPLimiter } from '../middleware/rateLimiter.js'
 import { z } from 'zod'
 import { sanitiserMiddleware } from '../middleware/MIDDLEWARE_SINK.js'
 import type { Request } from '../../types/user.types.js'
@@ -10,6 +11,8 @@ export function registerRoute() {
 
   router.post(
     '/',
+    globalTrafficLimiter(1, 100, 'register'),
+    IPLimiter(5, 3, 'register'),
     sanitiserMiddleware(
       'body',
       registerSchema,

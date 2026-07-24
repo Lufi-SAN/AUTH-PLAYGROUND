@@ -1,13 +1,13 @@
 import { redisKeys } from '../config/redis.js'
 import { redis } from '../loaders/loadRedis.js'
 import { updateUserVerificationStatusDB } from '../repositories/verifyEmailRepo.js'
-import { OtpNotFound } from '../errors/AppErrors.js'
+import { OtpNotFoundError } from '../errors/AppErrors.js'
 
 async function checkRedisForOTPKey(redisKey: string) {
   const redisInstance = redis.getRedisInstance()
   const email = await redisInstance.hget(redisKey, 'email')
   if (!email) {
-    throw new OtpNotFound('OTP invalid or missing')
+    throw new OtpNotFoundError('OTP invalid or missing')
   }
 
   return email

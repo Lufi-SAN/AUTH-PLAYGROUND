@@ -11,7 +11,7 @@ class BadRequestError extends DomainError implements DomainErrorType {
     super()
   }
 }
-class InvalidUserFormCredentials
+class InvalidUserFormCredentialsError
   extends DomainError
   implements DomainErrorType
 {
@@ -24,7 +24,10 @@ class InvalidUserFormCredentials
     super()
   }
 }
-class InvalidLoginCredentials extends DomainError implements DomainErrorType {
+class InvalidLoginCredentialsError
+  extends DomainError
+  implements DomainErrorType
+{
   constructor(
     public detail: string,
     public readonly message = 'HTTP Error' as const,
@@ -34,7 +37,7 @@ class InvalidLoginCredentials extends DomainError implements DomainErrorType {
     super()
   }
 }
-class UserAlreadyExists extends DomainError implements DomainErrorType {
+class UserAlreadyExistsError extends DomainError implements DomainErrorType {
   constructor(
     public detail: string,
     public readonly message = 'HTTP Error' as const,
@@ -44,7 +47,7 @@ class UserAlreadyExists extends DomainError implements DomainErrorType {
     super()
   }
 }
-class UnauthorizedUser extends DomainError implements DomainErrorType {
+class UnauthorizedUserError extends DomainError implements DomainErrorType {
   constructor(
     public detail: string,
     public readonly message = 'HTTP Error' as const,
@@ -54,7 +57,7 @@ class UnauthorizedUser extends DomainError implements DomainErrorType {
     super()
   }
 }
-class TooManyAttempts extends DomainError implements DomainErrorType {
+class TooManyAttemptsError extends DomainError implements DomainErrorType {
   constructor(
     public detail: string,
     public readonly message = 'HTTP Error' as const,
@@ -65,7 +68,7 @@ class TooManyAttempts extends DomainError implements DomainErrorType {
   }
 }
 
-class UserNotFound extends DomainError implements DomainErrorType {
+class UserNotFoundError extends DomainError implements DomainErrorType {
   constructor(
     public detail: string,
     public readonly message = 'HTTP Error' as const,
@@ -76,7 +79,7 @@ class UserNotFound extends DomainError implements DomainErrorType {
   }
 }
 
-class OtpNotFound extends DomainError implements DomainErrorType {
+class OtpNotFoundError extends DomainError implements DomainErrorType {
   constructor(
     public detail: string,
     public readonly message = 'HTTP Error' as const,
@@ -89,11 +92,11 @@ class OtpNotFound extends DomainError implements DomainErrorType {
 
 export {
   BadRequestError,
-  InvalidUserFormCredentials,
-  InvalidLoginCredentials,
-  UserAlreadyExists,
-  UnauthorizedUser,
-  TooManyAttempts,
-  UserNotFound,
-  OtpNotFound,
+  InvalidUserFormCredentialsError,
+  InvalidLoginCredentialsError,
+  UserAlreadyExistsError,
+  UnauthorizedUserError,
+  TooManyAttemptsError,
+  UserNotFoundError,
+  OtpNotFoundError,
 }

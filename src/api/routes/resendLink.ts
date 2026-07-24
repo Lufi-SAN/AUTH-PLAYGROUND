@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { globalTrafficLimiter, IPLimiter } from '../middleware/rateLimiter.js'
 import { z } from 'zod'
 import type { Request } from '../../types/user.types.js'
 import { resendLink } from '../controllers/resendLinkController.js'
@@ -10,6 +11,8 @@ export function resendLinkRoute() {
 
   router.post(
     '/',
+    globalTrafficLimiter(10, 200, 'resend'),
+    IPLimiter(15, 2, 'resend'),
     sanitiserMiddleware(
       'body',
       resendLinkSchema,

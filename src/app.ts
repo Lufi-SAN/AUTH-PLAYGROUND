@@ -12,6 +12,7 @@ export function createApp() {
   const app = express()
 
   //express instance settings/config
+  app.set('trust proxy', 1)
   app.disable('x-powered-by')
 
   //express instance listeners (all routes)

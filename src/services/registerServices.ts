@@ -4,7 +4,7 @@ import { argon2Config } from '../config/argon2.js'
 import { saveNewUserDB } from '../repositories/registerRepo.js'
 import { redisKeys } from '../config/redis.js'
 import { DatabaseError } from 'pg'
-import { UserAlreadyExists } from '../errors/AppErrors.js'
+import { UserAlreadyExistsError } from '../errors/AppErrors.js'
 import { redis } from '../loaders/loadRedis.js'
 import { enqueueOTPEmailJob } from '../jobs/enqueueOTPEmailJob.js'
 
@@ -27,9 +27,9 @@ async function saveNewUser(
   } catch (error) {
     if (error instanceof DatabaseError && error.code === '23505') {
       if (error.constraint === 'users_email_unique_idx') {
-        throw new UserAlreadyExists('Email already exists')
+        throw new UserAlreadyExistsError('Email already exists')
       } else if (error.constraint === 'users_username_unique_idx') {
-        throw new UserAlreadyExists('Username already exists')
+        throw new UserAlreadyExistsError('Username already exists')
       }
     }
     throw error
