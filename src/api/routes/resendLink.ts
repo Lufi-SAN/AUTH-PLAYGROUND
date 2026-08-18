@@ -11,8 +11,8 @@ export function resendLinkRoute() {
 
   router.post(
     '/',
-    globalTrafficLimiter(10, 200, 'resend'),
     IPLimiter(15, 2, 'resend'),
+    globalTrafficLimiter(10, 200, 'resend'),
     sanitiserMiddleware(
       'body',
       resendLinkSchema,
