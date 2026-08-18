@@ -11,8 +11,8 @@ export function registerRoute() {
 
   router.post(
     '/',
-    globalTrafficLimiter(1, 100, 'register'),
     IPLimiter(5, 3, 'register'),
+    globalTrafficLimiter(1, 100, 'register'),
     sanitiserMiddleware(
       'body',
       registerSchema,

@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import {
+  verificationMethodRoute,
   registerRoute,
   verifyEmailRoute,
   resendLinkRoute,
@@ -8,12 +9,11 @@ import {
 export function loadRouter() {
   const router = Router()
 
+  router.use('/verification-method', verificationMethodRoute())
   router.use('/register', registerRoute())
   router.use('/verify-email', verifyEmailRoute())
   router.use('/resend-verification', resendLinkRoute())
   // router.use('/login')
-  // router.use('/profile')
-  // router.use('/refresh')
   // router.use('/change-password')
   // router.use('/change-email')
   // router.use('/delete-account')

@@ -11,6 +11,7 @@ class BadRequestError extends DomainError implements DomainErrorType {
     super()
   }
 }
+
 class InvalidUserFormCredentialsError
   extends DomainError
   implements DomainErrorType
@@ -24,6 +25,7 @@ class InvalidUserFormCredentialsError
     super()
   }
 }
+
 class InvalidLoginCredentialsError
   extends DomainError
   implements DomainErrorType
@@ -37,6 +39,7 @@ class InvalidLoginCredentialsError
     super()
   }
 }
+
 class UserAlreadyExistsError extends DomainError implements DomainErrorType {
   constructor(
     public detail: string,
@@ -47,6 +50,7 @@ class UserAlreadyExistsError extends DomainError implements DomainErrorType {
     super()
   }
 }
+
 class UnauthorizedUserError extends DomainError implements DomainErrorType {
   constructor(
     public detail: string,
@@ -57,6 +61,7 @@ class UnauthorizedUserError extends DomainError implements DomainErrorType {
     super()
   }
 }
+
 class TooManyAttemptsError extends DomainError implements DomainErrorType {
   constructor(
     public detail: string,
@@ -90,6 +95,17 @@ class OtpNotFoundError extends DomainError implements DomainErrorType {
   }
 }
 
+class UserNotVerifiedError extends DomainError implements DomainErrorType {
+  constructor(
+    public detail: string,
+    public readonly message = 'HTTP Error' as const,
+    public readonly status = 403 as const,
+    public readonly title = 'Forbidden' as const,
+  ) {
+    super()
+  }
+}
+
 export {
   BadRequestError,
   InvalidUserFormCredentialsError,
@@ -99,4 +115,5 @@ export {
   TooManyAttemptsError,
   UserNotFoundError,
   OtpNotFoundError,
+  UserNotVerifiedError,
 }

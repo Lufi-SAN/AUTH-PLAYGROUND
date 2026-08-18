@@ -4,12 +4,15 @@ import { sanitiserMiddleware } from '../middleware/MIDDLEWARE_SINK.js'
 import { verifyEmailSchema } from './schemas/SCHEMA_SINK.js'
 import { verifyEmail } from '../controllers/verifyEmailController.js'
 import type { Request } from '../../types/user.types.js'
+import { globalTrafficLimiter, IPLimiter } from '../middleware/rateLimiter.js'
 
 export function verifyEmailRoute() {
   const router = Router()
 
   router.get(
-    '/:otp/:emailHash',
+    '/:otp',
+    IPLimiter(1, 10, 'verifyEmail'),
+    globalTrafficLimiter(1, 100, 'verifyEmail'),
     sanitiserMiddleware(
       'params',
       verifyEmailSchema,

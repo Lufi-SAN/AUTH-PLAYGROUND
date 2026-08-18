@@ -19,7 +19,7 @@ export function createEmailWorker() {
           html: `<h1>Hello! Here's your OTP Code. Made easy through a verification link </h1><p>Click here: <a href="${appConfig.appDomain}/verify-email/${otp}">Verify Email</a></p>`,
         })
 
-        console.log(`${appConfig.appDomain}/verify-email/${otp}/${email}`)
+        console.log(`${appConfig.appDomain}/verify-email/${otp}`)
         console.log('Message sent ID:', info.messageId)
         console.log('Accepted Recipient List:', info.accepted) // Array of addresses that accepted the delivery
         console.log('Rejected Recipient List:', info.rejected) // Array of addresses that flat-out refused the message

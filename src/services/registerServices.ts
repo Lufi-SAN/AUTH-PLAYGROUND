@@ -7,13 +7,14 @@ import { DatabaseError } from 'pg'
 import { UserAlreadyExistsError } from '../errors/AppErrors.js'
 import { redis } from '../loaders/loadRedis.js'
 import { enqueueOTPEmailJob } from '../jobs/enqueueOTPEmailJob.js'
+import type { AuthStrategy } from '../types/user.types.js'
+import type { MyRedisClientType } from '../loaders/loadRedis.js'
 
-async function otpAndHash(password: string, email: string) {
-  const otp = generateSecure14DigitString()
+async function createPasswordHash(password: string) {
   const passwordHash = await argon2id.hash(password, {
     memoryCost: argon2Config.memoryCost,
   })
-  return { passwordHash, otp }
+  return passwordHash
 }
 
 async function saveNewUser(
@@ -36,11 +37,13 @@ async function saveNewUser(
   }
 }
 
-export async function redisOTPHashSetup(email: string, otp: string) {
-  const redisKey = redisKeys.emailVerificationOTP(otp)
-  const redisInstance = redis.getRedisInstance()
+export async function redisOTPKeySetup(
+  redisInstance: MyRedisClientType,
+  redisKey: string,
+  email: string,
+) {
   await redisInstance
-    .pipeline()
+    .multi()
     .hset(redisKey, {
       email,
     })
@@ -58,17 +61,24 @@ export async function registerUserOrchestrator(
   password: string,
   username: string,
   email: string,
-): Promise<{ id: string; username: string; email: string }> {
-  const { passwordHash, otp } = await otpAndHash(password, email)
+  strategy: AuthStrategy,
+): Promise<{ id: string; username: string; email: string } | undefined> {
+  const passwordHash = await createPasswordHash(password)
 
   //service for db
   const newUserData = await saveNewUser(username, email, passwordHash)
 
-  //service for redis
-  await redisOTPHashSetup(email, otp)
+  if (strategy === 'emailVerification') {
+    const otp = generateSecure14DigitString()
 
-  //service for email queue
-  await sendOTPEmail(email, otp)
+    const redisInstance = redis.getRedisInstance()
+    const redisKey = redisKeys.emailVerificationOTP(otp)
+    //service for redis
+    await redisOTPKeySetup(redisInstance, redisKey, email)
 
-  return newUserData
+    //service for email queue
+    await sendOTPEmail(email, otp)
+
+    return newUserData
+  }
 }
