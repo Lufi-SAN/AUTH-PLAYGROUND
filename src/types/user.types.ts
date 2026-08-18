@@ -37,3 +37,5 @@ export interface DomainErrorType extends Error {
   title: string
   detail: string
 }
+
+export type { AuthStrategy } from '../lifecycle/schemas/authStrategy_schema.js'

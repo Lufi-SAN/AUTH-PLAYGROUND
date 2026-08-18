@@ -1,3 +1,5 @@
 export { registerSchema } from './register_schema.js'
 export { verifyEmailSchema } from './verifyEmail_schema.js'
 export { resendLinkSchema } from './resendLink_schema.js'
+export { loginSchema } from './login_schema.js'
+export { verificationMethodSchema } from './verificationMethod_schema.js'

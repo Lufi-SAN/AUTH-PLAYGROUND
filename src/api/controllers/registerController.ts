@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from '../../types/user.types.js'
+import { appState } from '../../lifecycle/appState.js'
 import { registerUserOrchestrator } from '../../services/registerServices.js'
 import { successResponse } from '../../utils/UTILS_SINK.js'
 
@@ -15,10 +16,13 @@ export async function registerUser(
       password: string
     }
 
+    const authStrategy = appState.getAppState().currentAuthStrategy
+
     const newUserData = await registerUserOrchestrator(
       password,
       username,
       email,
+      authStrategy,
     )
 
     return res.json(
