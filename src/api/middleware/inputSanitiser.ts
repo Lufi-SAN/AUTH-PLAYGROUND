@@ -2,7 +2,7 @@ import { z } from 'zod'
 import type { Request, Response, NextFunction } from '../../types/user.types.js'
 import {
   BadRequestError,
-  InvalidUserFormCredentials,
+  InvalidUserFormCredentialsError,
 } from '../../errors/AppErrors.js'
 
 export type SanitiserInputType =
@@ -40,7 +40,9 @@ export function sanitiserMiddleware<T extends z.ZodSchema>(
           return next(new BadRequestError('Malformed request structure.'))
         } else {
           return next(
-            new InvalidUserFormCredentials('Invalid data format or content.'),
+            new InvalidUserFormCredentialsError(
+              'Invalid data format or content.',
+            ),
           )
         }
       }
