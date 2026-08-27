@@ -6,7 +6,7 @@ import type { Request } from '../../types/user.types.js'
 import { loginSchema } from './schemas/SCHEMA_SINK.js'
 import { loginUser } from '../controllers/loginController.js'
 
-export function loginRoute() {
+export function loginRouter() {
   const router = Router()
 
   router.post(

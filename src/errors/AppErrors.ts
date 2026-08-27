@@ -106,6 +106,45 @@ class UserNotVerifiedError extends DomainError implements DomainErrorType {
   }
 }
 
+class MissingAuthCredentialsError
+  extends DomainError
+  implements DomainErrorType
+{
+  constructor(
+    public detail: string = 'Required authentication cookies are missing.',
+    public readonly message = 'HTTP Error' as const,
+    public readonly status = 401 as const,
+    public readonly title = 'Unauthorized' as const,
+  ) {
+    super()
+  }
+}
+
+class InvalidAuthTokenError extends DomainError implements DomainErrorType {
+  constructor(
+    public detail: string = 'The provided authentication token is invalid or expired.',
+    public readonly message = 'HTTP Error' as const,
+    public readonly status = 401 as const,
+    public readonly title = 'Unauthorized' as const,
+  ) {
+    super()
+  }
+}
+
+class SessionBreachDetectedError
+  extends DomainError
+  implements DomainErrorType
+{
+  constructor(
+    public detail: string = 'A security violation occurred. Please log in again.',
+    public readonly message = 'HTTP Error' as const,
+    public readonly status = 401 as const,
+    public readonly title = 'Unauthorized' as const,
+  ) {
+    super()
+  }
+}
+
 export {
   BadRequestError,
   InvalidUserFormCredentialsError,
@@ -116,4 +155,7 @@ export {
   UserNotFoundError,
   OtpNotFoundError,
   UserNotVerifiedError,
+  MissingAuthCredentialsError,
+  InvalidAuthTokenError,
+  SessionBreachDetectedError,
 }

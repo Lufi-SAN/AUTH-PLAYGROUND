@@ -24,6 +24,10 @@ export async function loadRedis() {
   return redisClient
 }
 
+/**
+(safe - after init object with prop that returns redis instance)
+error thrown if redis instance cant be found during runtime - I should be informed?
+*/
 export const redis = {
   getRedisInstance: () => {
     if (!redisInstance) {

@@ -15,10 +15,13 @@ export function loadQueues() {
     connection: sharedQueueRedis as unknown as Queue['opts']['connection'],
   }) //any job added to this queue goes to emailQueue worker
 
+  //Give them all variables to hold/reference them
   emailQueue = email
+  //Store all the variables in an array
   queueArray = [emailQueue]
 }
 
+//(safe i.e. after init) function that returns all the Queues we have from the array
 export const Queues = function () {
   if (queueArray.includes(null)) {
     throw new Error(`All queues not yet initialized: ${queueArray}`)

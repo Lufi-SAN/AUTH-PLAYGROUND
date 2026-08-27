@@ -78,7 +78,9 @@ export async function initializeKeysStore() {
       .set(KEY_FOR_ACTIVE_KID_POINTER, kid)
       .exec()
 
-    inMemoryKeysStore(privateKey, publicKey, kid)
+    const validPrivateKey = (await importJWK(private_jwk)) as CryptoKey
+    const validPublicKey = (await importJWK(public_jwk)) as CryptoKey
+    inMemoryKeysStore(validPrivateKey, validPublicKey, kid)
   }
 
   if (activeKid) {
@@ -137,9 +139,9 @@ export async function initializeKeysStore() {
         .set(KEY_FOR_ACTIVE_KID_POINTER, kid)
         .exec()
       //importJwk from Postgres & in-memory store
-      const privateKey = (await importJWK(private_jwk)) as CryptoKey
-      const publicKey = (await importJWK(public_jwk)) as CryptoKey
-      inMemoryKeysStore(privateKey, publicKey, kid)
+      const validPrivateKey = (await importJWK(private_jwk)) as CryptoKey
+      const validPublicKey = (await importJWK(public_jwk)) as CryptoKey
+      inMemoryKeysStore(validPrivateKey, validPublicKey, kid)
     }
   }
 }

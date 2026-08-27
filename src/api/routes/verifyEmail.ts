@@ -6,7 +6,7 @@ import { verifyEmail } from '../controllers/verifyEmailController.js'
 import type { Request } from '../../types/user.types.js'
 import { globalTrafficLimiter, IPLimiter } from '../middleware/rateLimiter.js'
 
-export function verifyEmailRoute() {
+export function verifyEmailRouter() {
   const router = Router()
 
   router.get(

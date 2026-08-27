@@ -6,7 +6,7 @@ import { resendLink } from '../controllers/resendLinkController.js'
 import { sanitiserMiddleware } from '../middleware/inputSanitiser.js'
 import { resendLinkSchema } from './schemas/SCHEMA_SINK.js'
 
-export function resendLinkRoute() {
+export function resendLinkRouter() {
   const router = Router()
 
   router.post(

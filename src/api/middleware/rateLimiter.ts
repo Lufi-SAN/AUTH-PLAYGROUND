@@ -26,7 +26,19 @@ export const IPLimiter = (window: number, limit: number, redisPrefix: string) =>
     },
   })
 
-//custom rate limiter
+/**custom rate limiter
+C
+U
+S
+T
+O
+M
+
+H
+E
+R
+E
+*/
 
 //total traffic limiter(ip-based)
 export const globalTrafficLimiter = (

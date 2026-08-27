@@ -6,7 +6,7 @@ import { chooseVerificationMethod } from '../controllers/verificationMethodContr
 import { sanitiserMiddleware } from '../middleware/inputSanitiser.js'
 import { verificationMethodSchema } from './schemas/SCHEMA_SINK.js'
 
-export function verificationMethodRoute() {
+export function verificationMethodRouter() {
   const router = Router()
 
   router.post(

@@ -1,0 +1,5 @@
+export { registerRouter } from './register.js'
+export { verifyEmailRouter } from './verifyEmail.js'
+export { resendLinkRouter } from './resendLink.js'
+export { verificationMethodRouter } from './verificationMethod.js'
+export { loginRouter } from './login.js'

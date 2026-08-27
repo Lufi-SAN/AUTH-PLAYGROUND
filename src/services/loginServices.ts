@@ -4,8 +4,9 @@ import argon2id from '@node-rs/argon2'
 import { argon2Config } from '../config/argon2.js'
 import { redisKeys } from '../config/redis.js'
 import { redis, type MyRedisClientType } from '../loaders/loadRedis.js'
-import { nanoid } from 'nanoid'
 import { SignJWT } from 'jose'
+import { getActiveKid, getSigningKey } from './keyStore.js'
+import * as crypto from 'crypto'
 
 async function getUserDetailsWithUsername(username: string) {
   const result = await getUserByUsernameDB(username)
@@ -28,23 +29,39 @@ async function createUserSession(
   redisInstance: MyRedisClientType,
   redisKey: string,
   userId: string,
+  activeTokenHash: string,
 ) {
   await redisInstance.hset(redisKey, {
-    userId,
+    user_id: userId,
     createdAt: new Date().toISOString(),
+    activeTokenHash,
+    usedTokenHashes: JSON.stringify([]),
   })
-  await redisInstance.expire(redisKey, 24 * 60 * 60) // Set session expiration to 24 hours
+  await redisInstance.expire(redisKey, 7 * 24 * 60 * 60) // Set session expiration to 7 days
 }
 
-async function createTokens() {
-  //Get signing key & active kid as metadata for eventual public key verification
-  const accessToken = await new SignJWT()
-    .setProtectedHeader({})
-    .setIssuedAt()
-    .setExpirationTime()
-    .sign()
+export function createRefreshToken() {
+  return crypto.randomBytes(32).toString('hex')
+}
 
-  return { accessToken }
+export async function createAccessToken(userId: string) {
+  //Get signing key & active kid as metadata for eventual public key verification
+  const signingKey = getSigningKey()
+  const kid = getActiveKid()
+  const accessToken = await new SignJWT({
+    sub: userId,
+  })
+    .setProtectedHeader({
+      alg: 'EdDSA',
+      kid,
+      typ: 'JWT',
+    })
+    .setIssuedAt()
+    .setExpirationTime('15m')
+    .setJti(crypto.randomUUID())
+    .sign(signingKey)
+
+  return accessToken
 }
 
 export async function loginUserOrchestrator(
@@ -56,8 +73,16 @@ export async function loginUserOrchestrator(
   if (!doesPasswordMatch) {
     throw new UserNotFoundError('User not found: Password does not match')
   }
-  const seshId = nanoid()
-  const redisKey = redisKeys.session(seshId)
+  const refreshToken = createRefreshToken()
+  const refreshTokenHash = crypto
+    .createHash('sha256')
+    .update(refreshToken)
+    .digest('hex')
+  const sessionId = `sid-${crypto.randomBytes(32).toString('hex')}`
+  const SESSION_KEY = redisKeys.session(sessionId)
   const redisInstance = redis.getRedisInstance()
-  await createUserSession(redisInstance, redisKey, userId)
+  await createUserSession(redisInstance, SESSION_KEY, userId, refreshTokenHash)
+  const accessToken = await createAccessToken(userId)
+
+  return { accessToken, refreshToken, sessionId }
 }

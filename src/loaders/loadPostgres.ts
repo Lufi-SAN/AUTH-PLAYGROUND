@@ -27,6 +27,7 @@ export async function loadPostgres() {
   return pool
 }
 
+//(safe)object to reach instance during runtime
 export const db = {
   query: async (text: string, params?: unknown[]) => {
     if (!poolInstance) {

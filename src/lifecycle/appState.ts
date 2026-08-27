@@ -15,7 +15,7 @@ class AppState {
       this._currentAuthStrategy = parsedStrategyAtBoot.data
     } else {
       throw new Error(
-        `Invalid auth strategy configuration: ${JSON.stringify(
+        `Invalid auth strategy configuration. Check env.DEFAULT_AUTH_STRATEGY: ${JSON.stringify(
           parsedStrategyAtBoot.error.format(),
         )}`,
       )
@@ -45,3 +45,10 @@ export const appState = {
     return appStateInstance
   },
 }
+
+/**
+Will run sync at buil
+If DEFAULT_AUTH_STRATEGY not present or wrong value, an error will be thrown by the constructor. This should stop build from happening
+We have an exported appState object that returns the appStateInstance. If empty, throws an error. Used in res-req path so handled by global error handler(I think should alert dev: dashboard OR process.exit straight)
+appStateInstance has setter & getter to affect private appState variable 
+*/
