@@ -10,10 +10,10 @@ export async function refreshUser(
   try {
     const { refreshToken, sessionId } = req.validatedData as {
       refreshToken?: string
-      sessionId: string
+      sessionId?: string
     }
 
-    const { accessToken, newRefreshToken } = await refreshUserOrchestrator(
+    const { newAccessToken, newRefreshToken } = await refreshUserOrchestrator(
       refreshToken,
       sessionId,
     )
@@ -33,8 +33,8 @@ export async function refreshUser(
       cookieOptions,
     )
 
-    // 4. Overwrite access and refresh cookies with the fresh set
-    res.cookie('accessToken', accessToken, accessOptions)
+    //Overwrite access and refresh cookies with the fresh set
+    res.cookie('accessToken', newAccessToken, accessOptions)
     res.cookie('refreshToken', newRefreshToken, longLivedOptions)
     res.cookie('sessionId', sessionId, longLivedOptions)
 

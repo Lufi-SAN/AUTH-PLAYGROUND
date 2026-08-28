@@ -6,19 +6,20 @@ import {
   InvalidAuthTokenError,
   UnauthorizedUserError,
   SessionBreachDetectedError,
+  SessionExpiredError,
 } from '../errors/AppErrors.js'
 import { createAccessToken, createRefreshToken } from './loginServices.js'
 
 export async function refreshUserOrchestrator(
   incomingRefreshToken: string | undefined,
-  sessionId: string,
+  incomingSessionId: string | undefined,
 ) {
-  if (!incomingRefreshToken || !sessionId) {
+  if (!incomingRefreshToken || !incomingSessionId) {
     throw new MissingAuthCredentialsError('Refresh token missing')
   }
 
   const redisInstance = redis.getRedisInstance()
-  const SESSION_KEY = redisKeys.session(sessionId)
+  const SESSION_KEY = redisKeys.session(incomingSessionId)
   const sessionData = await redisInstance.hgetall(SESSION_KEY)
 
   if (!sessionData) {
@@ -26,28 +27,34 @@ export async function refreshUserOrchestrator(
   }
 
   const usedTokenHashes: string[] = JSON.parse(
-    sessionData.usedTokenHashes || '[]',
+    sessionData.used_token_hashes || '[]',
   )
-  const activeTokenHash = sessionData.activeTokenHash
+  const activeTokenHash = sessionData.active_token_hash
   const userId = sessionData.user_id
 
-  const incomingHash = crypto
+  const incomingRefreshTokenHash = crypto
     .createHash('sha256')
     .update(incomingRefreshToken)
     .digest('hex')
 
   //Token reuse? Wipe the session
-  if (usedTokenHashes.includes(incomingHash)) {
+  if (usedTokenHashes.includes(incomingRefreshTokenHash)) {
     // NUCLEAR OPTION: Attacker or Legitimate user is re-submitting old tokens.
     await redisInstance.del(SESSION_KEY)
     throw new SessionBreachDetectedError('Token reuse. Session invalidated.')
   }
 
-  if (activeTokenHash !== incomingHash) {
+  //Check if correct refresh token to session link
+  if (activeTokenHash !== incomingRefreshTokenHash) {
     throw new InvalidAuthTokenError('Refresh token is invalid')
   }
 
-  usedTokenHashes.push(incomingHash)
+  usedTokenHashes.push(incomingRefreshTokenHash)
+
+  //CAP on the array ballooning - what's cleared wouldn't be risky realistically
+  if (usedTokenHashes.length > 5) {
+    usedTokenHashes.shift() // Removes the oldest hash from the front of the array
+  }
 
   const newRefreshToken = createRefreshToken()
   const newRefreshTokenHash = crypto
@@ -56,12 +63,15 @@ export async function refreshUserOrchestrator(
     .digest('hex')
 
   await redisInstance.hset(SESSION_KEY, {
-    activeTokenHash: newRefreshTokenHash,
-    usedTokenHashes: JSON.stringify(usedTokenHashes),
+    active_token_hash: newRefreshTokenHash,
+    used_token_hashes: JSON.stringify(usedTokenHashes),
   })
 
   await redisInstance.expire(SESSION_KEY, 7 * 24 * 60 * 60) //Extend TTL of your session by re-starting expiry time
 
-  const accessToken = await createAccessToken(userId as string)
-  return { accessToken, newRefreshToken, sessionId }
+  const newAccessToken = await createAccessToken(
+    userId as string,
+    incomingSessionId,
+  )
+  return { newAccessToken, newRefreshToken, incomingSessionId }
 }

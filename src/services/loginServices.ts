@@ -33,32 +33,32 @@ async function createUserSession(
 ) {
   await redisInstance.hset(redisKey, {
     user_id: userId,
-    createdAt: new Date().toISOString(),
-    activeTokenHash,
-    usedTokenHashes: JSON.stringify([]),
+    created_at: new Date().toISOString(),
+    active_token_hash: activeTokenHash,
+    used_token_hashes: JSON.stringify([]),
   })
-  await redisInstance.expire(redisKey, 7 * 24 * 60 * 60) // Set session expiration to 7 days
+  await redisInstance.expire(redisKey, 7 * 24 * 60 * 60) // Set session expiration to 30 days
 }
 
 export function createRefreshToken() {
   return crypto.randomBytes(32).toString('hex')
 }
 
-export async function createAccessToken(userId: string) {
+export async function createAccessToken(userId: string, sessionId: string) {
   //Get signing key & active kid as metadata for eventual public key verification
   const signingKey = getSigningKey()
   const kid = getActiveKid()
   const accessToken = await new SignJWT({
     sub: userId,
+    sid: sessionId,
   })
     .setProtectedHeader({
       alg: 'EdDSA',
       kid,
-      typ: 'JWT',
+      typ: 'at+jwt',
     })
     .setIssuedAt()
     .setExpirationTime('15m')
-    .setJti(crypto.randomUUID())
     .sign(signingKey)
 
   return accessToken
@@ -82,7 +82,7 @@ export async function loginUserOrchestrator(
   const SESSION_KEY = redisKeys.session(sessionId)
   const redisInstance = redis.getRedisInstance()
   await createUserSession(redisInstance, SESSION_KEY, userId, refreshTokenHash)
-  const accessToken = await createAccessToken(userId)
+  const accessToken = await createAccessToken(userId, sessionId)
 
   return { accessToken, refreshToken, sessionId }
 }

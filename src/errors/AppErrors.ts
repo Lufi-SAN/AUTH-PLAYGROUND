@@ -145,6 +145,17 @@ class SessionBreachDetectedError
   }
 }
 
+class SessionExpiredError extends DomainError implements DomainErrorType {
+  constructor(
+    public detail: string = 'Your session has expired. Please log in again.',
+    public readonly message = 'HTTP Error' as const,
+    public readonly status = 401 as const,
+    public readonly title = 'Unauthorized' as const,
+  ) {
+    super()
+  }
+}
+
 export {
   BadRequestError,
   InvalidUserFormCredentialsError,
@@ -158,4 +169,5 @@ export {
   MissingAuthCredentialsError,
   InvalidAuthTokenError,
   SessionBreachDetectedError,
+  SessionExpiredError,
 }

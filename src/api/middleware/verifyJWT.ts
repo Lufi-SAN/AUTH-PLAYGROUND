@@ -23,14 +23,6 @@ async function verifyJWT(req: Request, res: Response, next: NextFunction) {
       algorithms: ['EdDSA'],
     })
 
-    /**Check if revoked
-      C
-      H
-      E
-      C
-      K
-    */
-
     req.user = { id: payload.sub as string }
     next()
   } catch (err) {
