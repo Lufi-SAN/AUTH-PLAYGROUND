@@ -13,9 +13,10 @@ import { insertNewActiveRowIfNecessary } from '../repositories/keyManagementRepo
 
 let lastRotatedPeriod: string | null = null
 
-async function createAndExportKeys() {
+export async function createAndExportKeys() {
   const { privateKey, publicKey } = await generateKeyPair('EdDSA', {
     crv: 'Ed25519',
+    extractable: true,
   })
 
   const privateJwk = await exportJWK(privateKey)
@@ -24,6 +25,8 @@ async function createAndExportKeys() {
   const kid = randomUUID()
   privateJwk.kid = kid
   publicJwk.kid = kid
+
+  privateJwk.alg = publicJwk.alg = 'EdDSA'
 
   return { privateKey, publicKey, privateJwk, publicJwk, kid }
 }
@@ -42,6 +45,7 @@ export async function initializeKeysStore() {
   const redisInstance = redis.getRedisInstance()
 
   const KEY_FOR_ACTIVE_KID_POINTER = redisKeys.kidPointer() //returns "jwk:active_kid"
+  const KEY_FOR_JWT_TRACKING = redisKeys.jwkTracker()
 
   const now = new Date()
   const nowToString = now.toISOString()
@@ -76,9 +80,12 @@ export async function initializeKeysStore() {
         rotation_period,
       })
       .set(KEY_FOR_ACTIVE_KID_POINTER, kid)
+      .sadd(KEY_FOR_JWT_TRACKING, KEY_FOR_JWK_STORE)
       .exec()
 
-    const validPrivateKey = (await importJWK(private_jwk)) as CryptoKey
+    const validPrivateKey = (await importJWK(private_jwk, 'EdDSA', {
+      extractable: true,
+    })) as CryptoKey
     const validPublicKey = (await importJWK(public_jwk)) as CryptoKey
     inMemoryKeysStore(validPrivateKey, validPublicKey, kid)
   }
@@ -93,6 +100,10 @@ export async function initializeKeysStore() {
       //everything kosher - rotation happened already - update in-memory
       const privateKey = (await importJWK(
         JSON.parse(privateJwk as string),
+        'EdDSA',
+        {
+          extractable: true,
+        },
       )) as CryptoKey
       const publicKey = (await importJWK(
         JSON.parse(publicJwk as string),
@@ -137,9 +148,13 @@ export async function initializeKeysStore() {
           rotation_period,
         })
         .set(KEY_FOR_ACTIVE_KID_POINTER, kid)
+        .del(KEY_FOR_JWT_TRACKING)
+        .sadd(KEY_FOR_JWT_TRACKING, KEY_FOR_JWK_STORE)
         .exec()
       //importJwk from Postgres & in-memory store
-      const validPrivateKey = (await importJWK(private_jwk)) as CryptoKey
+      const validPrivateKey = (await importJWK(private_jwk, 'EdDSA', {
+        extractable: true,
+      })) as CryptoKey
       const validPublicKey = (await importJWK(public_jwk)) as CryptoKey
       inMemoryKeysStore(validPrivateKey, validPublicKey, kid)
     }
@@ -148,6 +163,8 @@ export async function initializeKeysStore() {
 
 export async function rotateKeys() {
   const currentMY = new Date().toISOString().slice(0, 10) // e.g. "2024-06-01"
+
+  const KEY_FOR_JWT_TRACKING = redisKeys.jwkTracker()
 
   //Cron job has already run for this month, so we can skip the rotation.
   if (lastRotatedPeriod === currentMY) return
@@ -158,62 +175,7 @@ export async function rotateKeys() {
 
   if (activeKid === null) {
     //Redis works; state recovery from Postgres
-    const {
-      privateKey,
-      publicKey,
-      privateJwk,
-      publicJwk,
-      kid: newKid,
-    } = await createAndExportKeys()
-
-    const { kid, private_jwk, public_jwk, rotation_period } =
-      await insertNewActiveRowIfNecessary({
-        kid: newKid,
-        privateJwk,
-        publicJwk,
-        rotationPeriod: currentMY,
-      }) //Checks, update if necessary, returns correct fields anyway
-
-    async function clearJwkKeys(redisInstance: MyRedisClientType) {
-      let cursor = '0'
-
-      do {
-        const [nextCursor, keys] = await redisInstance.scan(
-          cursor,
-          'MATCH',
-          `${REDIS_PREFIXES.JWK_STORE}*`,
-          'COUNT',
-          100,
-        )
-
-        cursor = nextCursor
-
-        if (keys.length) {
-          await redisInstance.del(keys)
-        }
-      } while (cursor !== '0')
-    }
-    await clearJwkKeys(redisInstance)
-
-    const KEY_OF_UPDATED_ACTIVE_PAIR = redisKeys.jwkStore(kid) // NEW jwk:keys:60000
-    //Cache redis, in-memory, lastRotatedPeriod
-    await redisInstance
-      .multi()
-      .expire('jwk:keys:*', 60 * 15)
-      .hset(KEY_OF_UPDATED_ACTIVE_PAIR, {
-        kid,
-        private_jwk: JSON.stringify(private_jwk),
-        public_jwk: JSON.stringify(public_jwk),
-        rotation_period,
-      })
-      .set(KEY_POINTING_TO_ACTIVE_KID, kid)
-      .exec()
-
-    deletePKCELoopwise()
-    const validPrivateKey = (await importJWK(private_jwk)) as CryptoKey
-    const validPublicKey = (await importJWK(public_jwk)) as CryptoKey
-    inMemoryKeysStore(validPrivateKey, validPublicKey, kid)
-    lastRotatedPeriod = currentMY
+    await ensureCorrectRotationExists()
     return
   }
 
@@ -238,12 +200,18 @@ export async function rotateKeys() {
         privateJwk,
         publicJwk,
         rotationPeriod: currentMY,
-      }) //Checks, update if necessary, returns
+      }) //Checks, update if necessary, returns correct fields anyway
+
+    const oldKeys = await redisInstance.smembers(KEY_FOR_JWT_TRACKING)
+    const pipeline = redisInstance.multi()
+
+    for (const oldKey of oldKeys) {
+      pipeline.expire(oldKey, 15 * 60)
+    }
+
     const KEY_OF_UPDATED_ACTIVE_PAIR = redisKeys.jwkStore(kid) // NEW jwk:keys:60000
     //Cache redis, in-memory, lastRotatedPeriod
-    await redisInstance
-      .multi()
-      .expire(KEY_OF_CURRENT_ACTIVE_PAIR, 60 * 15)
+    pipeline
       .hset(KEY_OF_UPDATED_ACTIVE_PAIR, {
         kid,
         private_jwk: JSON.stringify(private_jwk),
@@ -251,20 +219,19 @@ export async function rotateKeys() {
         rotation_period,
       })
       .set(KEY_POINTING_TO_ACTIVE_KID, kid)
-      .exec() //ttl KEY_OF_CURRENT_ACTIVE_PAIR
+      .del(KEY_FOR_JWT_TRACKING)
+      .sadd(KEY_FOR_JWT_TRACKING, KEY_OF_UPDATED_ACTIVE_PAIR)
 
-    const validPrivateKey = (await importJWK(private_jwk)) as CryptoKey
+    await pipeline.exec()
+
+    deletePKCELoopwise()
+    const validPrivateKey = (await importJWK(private_jwk, 'EdDSA', {
+      extractable: true,
+    })) as CryptoKey
     const validPublicKey = (await importJWK(public_jwk)) as CryptoKey
     inMemoryKeysStore(validPrivateKey, validPublicKey, kid)
-    if (activeKid !== kid) {
-      setTimeout(
-        () => {
-          deletePublicKeyCacheEntry(activeKid as string)
-        },
-        15 * 60 * 1000,
-      )
-    }
     lastRotatedPeriod = currentMY
+    return
   }
 
   if (lastRotationPeriodFromRedis === currentMY) {
