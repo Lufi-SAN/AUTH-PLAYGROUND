@@ -1,12 +1,11 @@
 import { generateKeyPair, exportJWK, importJWK } from 'jose'
 import { randomUUID } from 'crypto'
-import { redisKeys, REDIS_PREFIXES } from '../config/redis.js'
-import { redis, type MyRedisClientType } from '../loaders/loadRedis.js'
+import { redisKeys } from '../config/redis.js'
+import { redis } from '../loaders/loadRedis.js'
 import {
   setActiveKid,
   setSigningKey,
   addToPublicKeyCache,
-  deletePublicKeyCacheEntry,
   deletePKCELoopwise,
 } from './keyStore.js'
 import { insertNewActiveRowIfNecessary } from '../repositories/keyManagementRepo.js'

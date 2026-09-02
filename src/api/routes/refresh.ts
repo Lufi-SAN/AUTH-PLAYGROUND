@@ -10,8 +10,8 @@ export function refreshRouter() {
   const router = Router()
   router.post(
     '/',
-    IPLimiter(0, 0, 'refresh'),
-    globalTrafficLimiter(0, 0, 'refresh'),
+    IPLimiter(15, 30, 'refresh'),
+    globalTrafficLimiter(1, 1000, 'refresh'),
     sanitiserMiddleware(
       'cookies',
       refreshSchema,

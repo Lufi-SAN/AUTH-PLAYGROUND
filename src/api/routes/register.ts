@@ -1,7 +1,10 @@
 import { Router } from 'express'
-import { globalTrafficLimiter, IPLimiter } from '../middleware/rateLimiter.js'
+import {
+  globalTrafficLimiter,
+  IPLimiter,
+  sanitiserMiddleware,
+} from '../middleware/MIDDLEWARE_SINK.js'
 import { z } from 'zod'
-import { sanitiserMiddleware } from '../middleware/MIDDLEWARE_SINK.js'
 import type { Request } from '../../types/user.types.js'
 import { registerSchema } from './schemas/SCHEMA_SINK.js'
 import { registerUser } from '../controllers/registerController.js'

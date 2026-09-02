@@ -1,3 +1,5 @@
 export { sanitiserMiddleware } from './inputSanitiser.js'
 export { globalErrorHandler } from './globalErrorHandler.js'
 export { notFoundHandler } from './404Handler.js'
+export { IPLimiter, globalTrafficLimiter } from './rateLimiter.js'
+export { verifyJWT } from './verifyJWT.js'

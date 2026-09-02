@@ -5,7 +5,11 @@ import { getActiveKid, getPublicKeyFromCache } from '../../services/keyStore.js'
 
 import { DomainError } from '../../errors/BaseDomainError.js'
 
-async function verifyJWT(req: Request, res: Response, next: NextFunction) {
+export async function verifyJWT(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     //Remember to run a cookie sanitiser for every protected route
     const { accessToken } = req.validatedData as {
