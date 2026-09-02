@@ -30,14 +30,20 @@ async function createUserSession(
   redisKey: string,
   userId: string,
   activeTokenHash: string,
+  sessionIndexKey: string,
+  sessionId: string,
 ) {
-  await redisInstance.hset(redisKey, {
-    user_id: userId,
-    created_at: new Date().toISOString(),
-    active_token_hash: activeTokenHash,
-    used_token_hashes: JSON.stringify([]),
-  })
-  await redisInstance.expire(redisKey, 7 * 24 * 60 * 60) // Set session expiration to 30 days
+  await redisInstance
+    .multi()
+    .hset(redisKey, {
+      user_id: userId,
+      created_at: new Date().toISOString(),
+      active_token_hash: activeTokenHash,
+      used_token_hashes: JSON.stringify([]),
+    })
+    .expire(redisKey, 7 * 24 * 60 * 60)
+    .sadd(sessionIndexKey, sessionId)
+    .exec()
 }
 
 export function createRefreshToken() {
@@ -80,8 +86,16 @@ export async function loginUserOrchestrator(
     .digest('hex')
   const sessionId = `sid-${crypto.randomBytes(32).toString('hex')}`
   const SESSION_KEY = redisKeys.session(sessionId)
+  const SESSION_INDEX_KEY = redisKeys.sessionIndex(userId)
   const redisInstance = redis.getRedisInstance()
-  await createUserSession(redisInstance, SESSION_KEY, userId, refreshTokenHash)
+  await createUserSession(
+    redisInstance,
+    SESSION_KEY,
+    userId,
+    refreshTokenHash,
+    SESSION_INDEX_KEY,
+    sessionId,
+  )
   const accessToken = await createAccessToken(userId, sessionId)
 
   return { accessToken, refreshToken, sessionId }
