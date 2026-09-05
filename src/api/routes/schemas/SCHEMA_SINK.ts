@@ -5,4 +5,7 @@ export { loginSchema } from './login_schema.js'
 export { verificationMethodSchema } from './verificationMethod_schema.js'
 export { verifyJWTSchema } from './verifyJWT_schema.js'
 export { refreshSchema } from './refresh_schema.js'
-export { changePasswordSchema } from './changePassword_schema.js'
+export {
+  changePasswordSchema,
+  sessionIdSchema,
+} from './changePassword_schema.js'

@@ -1,6 +1,5 @@
 import { generateSecure14DigitString } from '../utils/generateSecure14DigitString.js'
-import argon2id from '@node-rs/argon2'
-import { argon2Config } from '../config/argon2.js'
+import { createPasswordHash } from '../utils/UTILS_SINK.js'
 import { saveNewUserDB } from '../repositories/registerRepo.js'
 import { redisKeys } from '../config/redis.js'
 import { DatabaseError } from 'pg'
@@ -9,13 +8,6 @@ import { redis } from '../loaders/loadRedis.js'
 import { enqueueOTPEmailJob } from '../jobs/enqueueOTPEmailJob.js'
 import type { AuthStrategy } from '../types/user.types.js'
 import type { MyRedisClientType } from '../loaders/loadRedis.js'
-
-async function createPasswordHash(password: string) {
-  const passwordHash = await argon2id.hash(password, {
-    memoryCost: argon2Config.memoryCost,
-  })
-  return passwordHash
-}
 
 async function saveNewUser(
   username: string,

@@ -1,7 +1,6 @@
 import { getUserByUsernameDB } from '../repositories/loginRepo.js'
 import { UserNotFoundError, UserNotVerifiedError } from '../errors/AppErrors.js'
-import argon2id from '@node-rs/argon2'
-import { argon2Config } from '../config/argon2.js'
+import { verifyPassword } from '../utils/verifyPassword.js'
 import { redisKeys } from '../config/redis.js'
 import { redis, type MyRedisClientType } from '../loaders/loadRedis.js'
 import { SignJWT } from 'jose'
@@ -19,19 +18,12 @@ async function getUserDetailsWithUsername(username: string) {
   return { userId: result.userId, passwordHash: result.passwordHash }
 }
 
-async function verifyPassword(password: string, passwordHash: string) {
-  return await argon2id.verify(passwordHash, password, {
-    memoryCost: argon2Config.memoryCost,
-  })
-}
-
 async function createUserSession(
   redisInstance: MyRedisClientType,
   redisKey: string,
   userId: string,
   activeTokenHash: string,
   sessionIndexKey: string,
-  sessionId: string,
 ) {
   await redisInstance
     .multi()
@@ -42,7 +34,7 @@ async function createUserSession(
       used_token_hashes: JSON.stringify([]),
     })
     .expire(redisKey, 7 * 24 * 60 * 60)
-    .sadd(sessionIndexKey, sessionId)
+    .sadd(sessionIndexKey, redisKey)
     .exec()
 }
 
@@ -94,7 +86,6 @@ export async function loginUserOrchestrator(
     userId,
     refreshTokenHash,
     SESSION_INDEX_KEY,
-    sessionId,
   )
   const accessToken = await createAccessToken(userId, sessionId)
 

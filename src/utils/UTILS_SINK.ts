@@ -1,3 +1,5 @@
 export { isDomainError } from './domainErrorChecker.js'
 export { errorResponse, successResponse } from './JSONGenerators.js'
 export { testWithRetry } from './testConnectionsWithRetry.js'
+export { verifyPassword } from './verifyPassword.js'
+export { createPasswordHash } from './createPasswordHash.js'
