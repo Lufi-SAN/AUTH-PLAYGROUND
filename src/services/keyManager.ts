@@ -8,7 +8,7 @@ import {
   addToPublicKeyCache,
   deletePKCELoopwise,
 } from './keyStore.js'
-import { insertNewActiveRowIfNecessary } from '../repositories/keyManagementRepo.js'
+import { insertNewActiveRowIfNecessaryDB } from '../repositories/keyManagementRepo.js'
 
 let lastRotatedPeriod: string | null = null
 
@@ -62,7 +62,7 @@ export async function initializeKeysStore() {
     } = await createAndExportKeys()
 
     const { kid, private_jwk, public_jwk, rotation_period } =
-      await insertNewActiveRowIfNecessary({
+      await insertNewActiveRowIfNecessaryDB({
         kid: newKid,
         privateJwk,
         publicJwk,
@@ -128,7 +128,7 @@ export async function initializeKeysStore() {
       } = await createAndExportKeys()
 
       const { kid, private_jwk, public_jwk, rotation_period } =
-        await insertNewActiveRowIfNecessary({
+        await insertNewActiveRowIfNecessaryDB({
           kid: newKid,
           privateJwk: newPrivateJwk,
           publicJwk: newPublicJwk,
@@ -194,7 +194,7 @@ export async function rotateKeys() {
     } = await createAndExportKeys()
 
     const { kid, private_jwk, public_jwk, rotation_period } =
-      await insertNewActiveRowIfNecessary({
+      await insertNewActiveRowIfNecessaryDB({
         kid: newKid,
         privateJwk,
         publicJwk,

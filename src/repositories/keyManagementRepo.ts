@@ -8,7 +8,7 @@ interface UpdateData {
   rotationPeriod: string
 }
 
-export async function insertNewActiveRowIfNecessary(updateData: UpdateData) {
+export async function insertNewActiveRowIfNecessaryDB(updateData: UpdateData) {
   const client = await db.getPoolInstance().connect()
 
   try {

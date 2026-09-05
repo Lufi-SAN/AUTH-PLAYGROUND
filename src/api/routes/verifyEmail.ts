@@ -1,10 +1,13 @@
 import { Router } from 'express'
 import { z } from 'zod'
-import { sanitiserMiddleware } from '../middleware/MIDDLEWARE_SINK.js'
+import {
+  sanitiserMiddleware,
+  globalTrafficLimiter,
+  IPLimiter,
+} from '../middleware/MIDDLEWARE_SINK.js'
 import { verifyEmailSchema } from './schemas/SCHEMA_SINK.js'
 import { verifyEmail } from '../controllers/verifyEmailController.js'
 import type { Request } from '../../types/user.types.js'
-import { globalTrafficLimiter, IPLimiter } from '../middleware/rateLimiter.js'
 
 export function verifyEmailRouter() {
   const router = Router()
