@@ -10,7 +10,3 @@ export const changePasswordSchema = z
     message: 'New passwords do not match',
     path: ['confirmNewPassword'],
   })
-
-export const sessionIdSchema = z.object({
-  sessionId: z.string().optional(),
-})

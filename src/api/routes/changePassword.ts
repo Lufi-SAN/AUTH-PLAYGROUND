@@ -3,8 +3,7 @@ import { IPLimiter, globalTrafficLimiter } from '../middleware/rateLimiter.js'
 import { sanitiserMiddleware } from '../middleware/inputSanitiser.js'
 import {
   changePasswordSchema,
-  verifyJWTSchema,
-  sessionIdSchema,
+  clearSessionsSchema,
 } from './schemas/SCHEMA_SINK.js'
 import type { Request } from '../../types/user.types.js'
 import { z } from 'zod'
@@ -21,19 +20,12 @@ export function changePasswordRouter() {
     globalTrafficLimiter(1, 200, 'change-password'),
     sanitiserMiddleware(
       'cookies',
-      verifyJWTSchema,
-      (req: Request, parsedData: z.infer<typeof verifyJWTSchema>) => {
+      clearSessionsSchema,
+      (req: Request, parsedData: z.infer<typeof clearSessionsSchema>) => {
         req.validatedData = parsedData
       },
     ),
     verifyJWT,
-    sanitiserMiddleware(
-      'cookies',
-      sessionIdSchema,
-      (req: Request, parsedData: z.infer<typeof sessionIdSchema>) => {
-        req.validatedData = parsedData
-      },
-    ),
     sanitiserMiddleware(
       'body',
       changePasswordSchema,

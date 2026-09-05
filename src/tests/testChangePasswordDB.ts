@@ -1,5 +1,5 @@
 import { loadPostgres } from '../loaders/loadPostgres.js'
-import { checkMatchAndChangeDB } from '../repositories/changePasswordRepo.js'
+import { updatePasswordHashDB } from '../repositories/changePasswordRepo.js'
 
 async function run() {
   await loadPostgres()
@@ -7,11 +7,7 @@ async function run() {
   const currentPassword = 'current_password' // Replace with the current password
   const newPassword = 'new_password' // Replace with the new password
 
-  const result = await checkMatchAndChangeDB(
-    userId,
-    currentPassword,
-    newPassword,
-  )
+  const result = await updatePasswordHashDB(userId, currentPassword)
   console.log('Result:', result)
 }
 

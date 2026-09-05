@@ -1,11 +1,13 @@
-import { MissingAuthCredentialsError } from '../errors/AppErrors.js'
+import {
+  MissingAuthCredentialsError,
+  UserNotFoundError,
+} from '../errors/AppErrors.js'
 import { redis } from '../loaders/loadRedis.js'
 import { redisKeys } from '../config/redis.js'
 import {
   updatePasswordHashDB,
   getUserPasswordHashDB,
 } from '../repositories/changePasswordRepo.js'
-import { UserNotFoundError } from '../errors/AppErrors.js'
 import { verifyPassword, createPasswordHash } from '../utils/UTILS_SINK.js'
 
 export async function changePasswordOrchestrator(
