@@ -9,6 +9,10 @@ CREATE TABLE users (
 
 	is_verified BOOLEAN NOT NULL DEFAULT false,
 
+	role TEXT NOT NULL DEFAULT 'user' CHECK(role IN ('user', 'admin')),
+
+	verification_strategy TEXT NOT NULL DEFAULT 'emailVerification' CHECK(verification_strategy IN ('emailVerification', 'totp', 'webauthn')),
+
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT now() 
 );

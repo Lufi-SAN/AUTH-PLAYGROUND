@@ -7,6 +7,11 @@ import { SignJWT } from 'jose'
 import { getActiveKid, getSigningKey } from './keyStore.js'
 import * as crypto from 'crypto'
 
+interface UserInfo {
+  userId: string
+  role: string
+}
+
 async function getUserDetailsWithUsername(username: string) {
   const result = await getUserByUsernameDB(username)
   if (result === 'Not verified') {
@@ -15,13 +20,17 @@ async function getUserDetailsWithUsername(username: string) {
   if (result === null) {
     throw new UserNotFoundError('User not found')
   }
-  return { userId: result.userId, passwordHash: result.passwordHash }
+  return {
+    userId: result.userId,
+    passwordHash: result.passwordHash,
+    role: result.role,
+  }
 }
 
 async function createUserSession(
   redisInstance: MyRedisClientType,
   redisKey: string,
-  userId: string,
+  { userId, role }: UserInfo,
   activeTokenHash: string,
   sessionIndexKey: string,
 ) {
@@ -29,6 +38,7 @@ async function createUserSession(
     .multi()
     .hset(redisKey, {
       user_id: userId,
+      role: role,
       created_at: new Date().toISOString(),
       active_token_hash: activeTokenHash,
       used_token_hashes: JSON.stringify([]),
@@ -42,13 +52,17 @@ export function createRefreshToken() {
   return crypto.randomBytes(32).toString('hex')
 }
 
-export async function createAccessToken(userId: string, sessionId: string) {
+export async function createAccessToken(
+  { userId, role }: UserInfo,
+  sessionId: string,
+) {
   //Get signing key & active kid as metadata for eventual public key verification
   const signingKey = getSigningKey()
   const kid = getActiveKid()
   const accessToken = await new SignJWT({
     sub: userId,
     sid: sessionId,
+    role: role,
   })
     .setProtectedHeader({
       alg: 'EdDSA',
@@ -66,7 +80,9 @@ export async function loginUserOrchestrator(
   username: string,
   password: string,
 ) {
-  const { userId, passwordHash } = await getUserDetailsWithUsername(username)
+  const { userId, passwordHash, role } =
+    await getUserDetailsWithUsername(username)
+  const userInfo = { userId, role }
   const doesPasswordMatch = await verifyPassword(password, passwordHash)
   if (!doesPasswordMatch) {
     throw new UserNotFoundError('User not found: Password does not match')
@@ -83,11 +99,11 @@ export async function loginUserOrchestrator(
   await createUserSession(
     redisInstance,
     SESSION_KEY,
-    userId,
+    userInfo,
     refreshTokenHash,
     SESSION_INDEX_KEY,
   )
-  const accessToken = await createAccessToken(userId, sessionId)
+  const accessToken = await createAccessToken(userInfo, sessionId)
 
   return { accessToken, refreshToken, sessionId }
 }

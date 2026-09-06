@@ -1,18 +1,18 @@
 import { appConfig } from '../config/app.js'
-import { authStrategySchema } from './schemas/authStrategy_schema.js'
-import type { AuthStrategy } from '../types/user.types.js'
+import { verificationStrategySchema } from './schemas/verificationStrategy_schema.js'
+import type { VerificationStrategy } from '../types/user.types.js'
 
 let appStateInstance: AppState | null = null
 
 class AppState {
-  private _currentAuthStrategy: AuthStrategy
+  private _currentVerificationStrategy: VerificationStrategy
 
   constructor() {
-    const parsedStrategyAtBoot = authStrategySchema.safeParse(
-      appConfig.authStrategy,
+    const parsedStrategyAtBoot = verificationStrategySchema.safeParse(
+      appConfig.verificationStrategy,
     )
     if (parsedStrategyAtBoot.success) {
-      this._currentAuthStrategy = parsedStrategyAtBoot.data
+      this._currentVerificationStrategy = parsedStrategyAtBoot.data
     } else {
       throw new Error(
         `Invalid auth strategy configuration. Check env.DEFAULT_AUTH_STRATEGY: ${JSON.stringify(
@@ -22,12 +22,12 @@ class AppState {
     }
   }
 
-  get currentAuthStrategy(): AuthStrategy {
-    return this._currentAuthStrategy
+  get currentVerificationStrategy(): VerificationStrategy {
+    return this._currentVerificationStrategy
   }
 
-  set currentAuthStrategy(strategy: AuthStrategy) {
-    this._currentAuthStrategy = strategy
+  set currentVerificationStrategy(strategy: VerificationStrategy) {
+    this._currentVerificationStrategy = strategy
   }
 }
 

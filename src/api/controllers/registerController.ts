@@ -1,4 +1,9 @@
-import type { Request, Response, NextFunction } from '../../types/user.types.js'
+import type {
+  Request,
+  Response,
+  NextFunction,
+  VerificationStrategy,
+} from '../../types/user.types.js'
 import { appState } from '../../lifecycle/appState.js'
 import { registerUserOrchestrator } from '../../services/registerServices.js'
 import { successResponse } from '../../utils/UTILS_SINK.js'
@@ -14,15 +19,25 @@ export async function registerUser(
       username: string
       email: string
       password: string
+      verificationStrategy?: VerificationStrategy
     }
 
-    const authStrategy = appState.getAppState().currentAuthStrategy
+    let { verificationStrategy } = req.validatedData as {
+      username: string
+      email: string
+      password: string
+      verificationStrategy?: VerificationStrategy
+    }
+
+    if (!verificationStrategy) {
+      verificationStrategy = appState.getAppState().currentVerificationStrategy
+    }
 
     const newUserData = await registerUserOrchestrator(
       password,
       username,
       email,
-      authStrategy,
+      verificationStrategy,
     )
 
     return res.json(
