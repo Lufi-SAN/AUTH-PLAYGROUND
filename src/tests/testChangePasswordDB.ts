@@ -10,5 +10,3 @@ async function run() {
   const result = await updatePasswordHashDB(userId, currentPassword)
   console.log('Result:', result)
 }
-
-run()

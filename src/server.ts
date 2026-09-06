@@ -10,6 +10,7 @@ import {
 import { registerProcessHandlers } from './lifecycle/processHandlers.js'
 import { createApp } from './app.js'
 import { scheduleCronJobs } from './jobs/cronjobs.js'
+import { initializeKeysStore } from './services/keyManager.js'
 
 async function startServer() {
   setupAppState()
@@ -18,6 +19,7 @@ async function startServer() {
   const mailer = await loadMailer()
   loadQueues()
   loadWorkers()
+  await initializeKeysStore()
   scheduleCronJobs()
 
   const app = createApp()

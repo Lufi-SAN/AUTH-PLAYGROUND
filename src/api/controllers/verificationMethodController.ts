@@ -11,7 +11,7 @@ export async function chooseVerificationMethod(
     const { strategy } = req.validatedData as {
       strategy: 'emailVerification' | 'totp' | 'webauthn'
     }
-    appState.getAppState().currentAuthStrategy = strategy
+    appState.getAppState().currentVerificationStrategy = strategy
     return res.json(
       successResponse('Verification method chosen successfully', { strategy }),
     )

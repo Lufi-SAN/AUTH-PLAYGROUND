@@ -3,11 +3,14 @@ import { RedisStore, type RedisReply } from 'rate-limit-redis'
 import { redis } from '../../loaders/loadRedis.js'
 import { TooManyAttemptsError } from '../../errors/AppErrors.js'
 
-const redisInstance = redis.getRedisInstance()
-
 //IP-layer rate limiter
-export const IPLimiter = (window: number, limit: number, redisPrefix: string) =>
-  rateLimit({
+export const IPLimiter = (
+  window: number,
+  limit: number,
+  redisPrefix: string,
+) => {
+  const redisInstance = redis.getRedisInstance()
+  return rateLimit({
     windowMs: window * 60 * 1000,
     limit,
     standardHeaders: 'draft-7',
@@ -25,7 +28,7 @@ export const IPLimiter = (window: number, limit: number, redisPrefix: string) =>
       )
     },
   })
-
+}
 /**custom rate limiter
 C
 U
@@ -45,8 +48,9 @@ export const globalTrafficLimiter = (
   window: number,
   limit: number,
   redisPrefix: string,
-) =>
-  rateLimit({
+) => {
+  const redisInstance = redis.getRedisInstance()
+  return rateLimit({
     windowMs: window * 60 * 1000,
     limit,
     standardHeaders: true,
@@ -59,5 +63,10 @@ export const globalTrafficLimiter = (
         ) as Promise<RedisReply>,
       prefix: 'rate-limit:global:',
     }),
-    handler: (req, res, next) => {},
+    handler: (req, res, next) => {
+      return next(
+        new TooManyAttemptsError('Too many requests, please try again later.'),
+      )
+    },
   })
+}

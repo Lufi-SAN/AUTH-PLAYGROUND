@@ -27,5 +27,3 @@ async function test(redisInstance: MyRedisClientType) {
     .expire('test:session', 60)
     .exec()
 }
-
-run()
