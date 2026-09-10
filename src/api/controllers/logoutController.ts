@@ -12,7 +12,6 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
   try {
     const { message } = await logoutOrchestrator(sessionId, userId)
 
-    res.clearCookie('accessToken')
     res.clearCookie('refreshToken')
     res.clearCookie('sessionId')
 

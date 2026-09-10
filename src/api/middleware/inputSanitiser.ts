@@ -46,6 +46,8 @@ export function sanitiserMiddleware<T extends z.ZodSchema>(
           )
         }
       }
+
+      return next(error)
     }
   }
 }

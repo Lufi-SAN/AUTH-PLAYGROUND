@@ -1,7 +1,6 @@
 import type { Request, Response, NextFunction } from '../../types/user.types.js'
 import { InvalidAuthTokenError } from '../../errors/AppErrors.js'
-import { jwtVerify } from 'jose'
-import { getActiveKid, getPublicKeyFromCache } from '../../services/keyStore.js'
+import { verifyJWTService } from '../../services/verifyJWTService.js'
 
 import { DomainError } from '../../errors/BaseDomainError.js'
 
@@ -12,20 +11,17 @@ export async function verifyJWT(
 ) {
   try {
     //Remember to run a cookie sanitiser for every protected route
-    const { accessToken } = req.validatedData as {
-      accessToken?: string
+    const { authorization } = req.validatedData as {
+      authorization?: string
     }
 
-    if (!accessToken) {
+    if (!authorization) {
       return next(new InvalidAuthTokenError('Access token has expired'))
     }
 
-    const kid = getActiveKid()
-    const publicKey = getPublicKeyFromCache(kid) as CryptoKey
+    const [type, token] = authorization.split(' ')
 
-    const { payload } = await jwtVerify(accessToken, publicKey, {
-      algorithms: ['EdDSA'],
-    })
+    const payload = await verifyJWTService(token as string)
 
     req.user = { id: payload.sub as string }
     next()

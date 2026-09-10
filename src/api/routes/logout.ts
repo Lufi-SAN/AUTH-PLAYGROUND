@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { IPLimiter, globalTrafficLimiter } from '../middleware/rateLimiter.js'
 import { sanitiserMiddleware } from '../middleware/inputSanitiser.js'
-import { clearSessionsSchema } from './schemas/SCHEMA_SINK.js'
+import { clearSessionsSchema, verifyJWTSchema } from './schemas/SCHEMA_SINK.js'
 import type { Request } from '../../types/user.types.js'
 import { z } from 'zod'
 import { verifyJWT } from '../middleware/verifyJWT.js'
@@ -15,6 +15,13 @@ export function logoutRouter() {
     '/',
     IPLimiter(15, 5, 'logout'),
     globalTrafficLimiter(1, 200, 'logout'),
+    sanitiserMiddleware(
+      'headers',
+      verifyJWTSchema,
+      (req: Request, parsedData: z.infer<typeof verifyJWTSchema>) => {
+        req.validatedData = parsedData
+      },
+    ),
     sanitiserMiddleware(
       'cookies',
       clearSessionsSchema,

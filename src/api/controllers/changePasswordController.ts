@@ -23,6 +23,10 @@ export async function changePassword(
       newPassword,
     )
 
+    res.clearCookie('accessToken')
+    res.clearCookie('refreshToken')
+    res.clearCookie('sessionId')
+
     return res.json(
       successResponse('Password changed successfully', updateInfo),
     )

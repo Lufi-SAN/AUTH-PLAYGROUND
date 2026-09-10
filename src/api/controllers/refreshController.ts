@@ -24,23 +24,21 @@ export async function refreshUser(
       sameSite: 'lax' as const,
     }
 
-    const accessOptions = Object.assign(
-      { maxAge: 15 * 60 * 1000 },
-      cookieOptions,
-    )
     const longLivedOptions = Object.assign(
       { maxAge: 7 * 24 * 60 * 60 * 1000 },
       cookieOptions,
     )
 
     //Overwrite access and refresh cookies with the fresh set
-    res.cookie('accessToken', newAccessToken, accessOptions)
     res.cookie('refreshToken', newRefreshToken, longLivedOptions)
     res.cookie('sessionId', sessionId, longLivedOptions)
 
-    return res.json(successResponse('Tokens refreshed successfully'))
+    return res.json(
+      successResponse('Tokens refreshed successfully', {
+        accessToken: newAccessToken,
+      }),
+    )
   } catch (err) {
-    res.clearCookie('accessToken')
     res.clearCookie('refreshToken')
     res.clearCookie('sessionId')
     return next(err)
