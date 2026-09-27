@@ -8,12 +8,13 @@ import {
   refreshRouter,
   changePasswordRouter,
   logoutRouter,
+  authRouter,
 } from '../api/routes/ROUTER_SINK.js'
 
 export function loadRouter() {
   const router = Router()
 
-  router.use('/verification-method', verificationMethodRouter())
+  router.use('/auth', authRouter())
   router.use('/register', registerRouter())
   router.use('/verify-email', verifyEmailRouter())
   router.use('/resend-verification', resendLinkRouter())
