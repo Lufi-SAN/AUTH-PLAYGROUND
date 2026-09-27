@@ -12,6 +12,20 @@ interface UserInfo {
   role: string
 }
 
+export interface UserJWTPayload {
+  sub: string
+  sid: string
+  role: string
+}
+
+export interface UserSessionData {
+  user_id: string
+  role: string
+  created_at: string
+  active_token_hash: string
+  used_token_hashes: string[]
+}
+
 async function getUserDetailsWithUsername(username: string) {
   const result = await getUserByUsernameDB(username)
   if (result === 'Not verified') {

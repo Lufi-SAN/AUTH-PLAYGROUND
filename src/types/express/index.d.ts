@@ -8,6 +8,7 @@ declare module 'express-serve-static-core' {
     }
     user?: {
       id: string
+      role?: string
     }
     validatedData?: Record<string, any>
     rateLimit?: {

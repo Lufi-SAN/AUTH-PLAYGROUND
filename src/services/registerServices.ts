@@ -26,9 +26,9 @@ async function saveNewUser(
   } catch (error) {
     if (error instanceof DatabaseError && error.code === '23505') {
       if (error.constraint === 'users_email_unique_idx') {
-        throw new UserAlreadyExistsError('Email already exists')
+        throw new UserAlreadyExistsError('Username or Email already exists')
       } else if (error.constraint === 'users_username_unique_idx') {
-        throw new UserAlreadyExistsError('Username already exists')
+        throw new UserAlreadyExistsError('Username or Email already exists')
       }
     }
     throw error

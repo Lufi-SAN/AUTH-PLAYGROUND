@@ -156,6 +156,17 @@ class SessionExpiredError extends DomainError implements DomainErrorType {
   }
 }
 
+class InsufficientRoleError extends DomainError implements DomainErrorType {
+  constructor(
+    public detail: string = 'You do not have the required role to access this resource.',
+    public readonly message = 'HTTP Error' as const,
+    public readonly status = 403 as const,
+    public readonly title = 'Forbidden' as const,
+  ) {
+    super()
+  }
+}
+
 export {
   BadRequestError,
   InvalidUserFormCredentialsError,
@@ -170,4 +181,5 @@ export {
   InvalidAuthTokenError,
   SessionBreachDetectedError,
   SessionExpiredError,
+  InsufficientRoleError,
 }

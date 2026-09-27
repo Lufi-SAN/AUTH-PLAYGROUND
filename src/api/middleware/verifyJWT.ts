@@ -1,7 +1,6 @@
 import type { Request, Response, NextFunction } from '../../types/user.types.js'
 import { InvalidAuthTokenError } from '../../errors/AppErrors.js'
 import { verifyJWTService } from '../../services/verifyJWTService.js'
-
 import { DomainError } from '../../errors/BaseDomainError.js'
 
 export async function verifyJWT(
@@ -23,7 +22,7 @@ export async function verifyJWT(
 
     const payload = await verifyJWTService(token as string)
 
-    req.user = { id: payload.sub as string }
+    req.user = { id: payload.sub as string, role: payload.role as string }
     next()
   } catch (err) {
     console.log('JWT verification error')

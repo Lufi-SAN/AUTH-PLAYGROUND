@@ -1,5 +1,6 @@
 import { jwtVerify } from 'jose'
 import { getActiveKid, getPublicKeyFromCache } from './keyStore.js'
+import type { UserJWTPayload } from '../types/user.types.js'
 
 export async function verifyJWTService(token: string) {
   const kid = getActiveKid()
@@ -9,5 +10,5 @@ export async function verifyJWTService(token: string) {
     algorithms: ['EdDSA'],
   })
 
-  return payload
+  return payload as unknown as UserJWTPayload
 }

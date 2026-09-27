@@ -39,3 +39,8 @@ export interface DomainErrorType extends Error {
 }
 
 export type { VerificationStrategy } from '../lifecycle/schemas/verificationStrategy_schema.js'
+
+export type {
+  UserJWTPayload,
+  UserSessionData,
+} from '../services/loginServices.js'
