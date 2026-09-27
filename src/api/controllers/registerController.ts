@@ -40,9 +40,9 @@ export async function registerUser(
       verificationStrategy,
     )
 
-    return res.json(
-      successResponse('User registered successfully', newUserData),
-    )
+    return res
+      .status(201)
+      .json(successResponse('User registered successfully', newUserData))
   } catch (error) {
     return next(error)
   }

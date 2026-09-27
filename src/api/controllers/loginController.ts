@@ -30,7 +30,7 @@ export async function loginUser(
     res.cookie('refreshToken', refreshToken, longLivedOptions)
     res.cookie('sessionId', sessionId, longLivedOptions)
 
-    return res.json(
+    return res.status(200).json(
       successResponse('User logged in successfully', {
         accessToken,
       }),

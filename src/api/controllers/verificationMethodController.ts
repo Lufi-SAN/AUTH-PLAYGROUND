@@ -12,9 +12,13 @@ export async function chooseVerificationMethod(
       strategy: 'emailVerification' | 'totp' | 'webauthn'
     }
     appState.getAppState().currentVerificationStrategy = strategy
-    return res.json(
-      successResponse('Verification method chosen successfully', { strategy }),
-    )
+    return res
+      .status(200)
+      .json(
+        successResponse('Verification method chosen successfully', {
+          strategy,
+        }),
+      )
   } catch (err) {
     next(err)
   }

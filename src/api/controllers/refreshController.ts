@@ -33,7 +33,7 @@ export async function refreshUser(
     res.cookie('refreshToken', newRefreshToken, longLivedOptions)
     res.cookie('sessionId', sessionId, longLivedOptions)
 
-    return res.json(
+    return res.status(200).json(
       successResponse('Tokens refreshed successfully', {
         accessToken: newAccessToken,
       }),

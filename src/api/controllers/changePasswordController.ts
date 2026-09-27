@@ -27,9 +27,9 @@ export async function changePassword(
     res.clearCookie('refreshToken')
     res.clearCookie('sessionId')
 
-    return res.json(
-      successResponse('Password changed successfully', updateInfo),
-    )
+    return res
+      .status(200)
+      .json(successResponse('Password changed successfully', updateInfo))
   } catch (error) {
     next(error)
   }

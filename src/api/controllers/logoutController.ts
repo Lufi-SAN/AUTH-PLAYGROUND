@@ -15,7 +15,7 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
     res.clearCookie('refreshToken')
     res.clearCookie('sessionId')
 
-    return res.json(successResponse(message))
+    return res.status(200).json(successResponse(message))
   } catch (error) {
     next(error)
   }

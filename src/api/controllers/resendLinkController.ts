@@ -13,7 +13,7 @@ export async function resendLink(
 
   try {
     const { message } = await resendLinkOrchestrator(email)
-    return res.json(successResponse(message))
+    return res.status(200).json(successResponse(message))
   } catch (err) {
     return next(err)
   }

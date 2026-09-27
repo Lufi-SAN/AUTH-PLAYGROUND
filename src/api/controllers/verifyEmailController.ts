@@ -14,7 +14,7 @@ export async function verifyEmail(
 
     const { message } = await verifyEmailOrchestrator(otp)
 
-    return res.json(successResponse(message))
+    return res.status(200).json(successResponse(message))
   } catch (error) {
     return next(error)
   }
