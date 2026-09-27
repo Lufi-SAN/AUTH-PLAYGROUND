@@ -1,0 +1,45 @@
+openapi: 3.0.4
+info:
+  title: AUTH-PLAYGROUND API
+  version: 1.0.0
+  description: This is the API documentation for the AUTH-PLAYGROUND project.
+
+servers:
+  - url: http://localhost:3000/v1
+    description: Local development server
+  #   e.g.
+  # - url: http://api.example.com/v1
+  #   description: Optional server description, e.g. Main (production) server
+  # - url: http://staging-api.example.com
+  #   description: Optional server description, e.g. Internal staging server for testing
+
+paths:
+  /register:
+    post:
+      summary: Registers a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                email:
+                  type: string
+                  maxLength: 255
+                password:
+                  type: string
+                  minLength: 8
+                  maxLength: 100
+                verificationStrategy:
+                  type: string
+                  enum: [emailVerification, totp, webauthn]
+              required:
+                - username
+                - email
+                - password
+      responses:

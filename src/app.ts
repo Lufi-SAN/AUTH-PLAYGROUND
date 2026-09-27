@@ -7,6 +7,14 @@ import {
   globalErrorHandler,
   notFoundHandler,
 } from './api/middleware/MIDDLEWARE_SINK.js'
+import swaggerUi from 'swagger-ui-express'
+import YAML from 'yaml'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 export function createApp() {
   const app = express()
@@ -20,6 +28,18 @@ export function createApp() {
   app.use(express.json())
   app.use(cookieParser())
 
+  app.use(
+    '/api-docs',
+    swaggerUi.serve,
+    swaggerUi.setup(
+      YAML.parse(
+        fs.readFileSync(
+          path.join(__dirname, '..', '/openapi/openapi.yaml'),
+          'utf8',
+        ),
+      ),
+    ),
+  )
   const v1Router = loadRouter()
   //express instance listeners (routes)
   app.use('/api/v1', v1Router)
