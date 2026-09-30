@@ -10,10 +10,12 @@ import {
 import type { Request } from '../../types/user.types.js'
 import { chooseVerificationMethod } from '../controllers/verificationMethodController.js'
 import { updateUserRole } from '../controllers/updateUserRoleController.js'
+import { getAllUsers } from '../controllers/getAllUsersController.js'
 import {
   verificationMethodSchema,
   verifyJWTSchema,
   updateUserRoleSchema,
+  paginationSchema,
 } from './schemas/SCHEMA_SINK.js'
 
 export function authRouter() {
@@ -44,9 +46,9 @@ export function authRouter() {
   )
 
   router.post(
-    '/assign-role',
-    IPLimiter(1, 5, 'assignRole'),
-    globalTrafficLimiter(1, 300, 'assignRole'),
+    '/update-role',
+    IPLimiter(1, 5, 'updateRole'),
+    globalTrafficLimiter(1, 300, 'updateRole'),
     sanitiserMiddleware(
       'headers',
       verifyJWTSchema,
@@ -64,6 +66,29 @@ export function authRouter() {
       },
     ),
     updateUserRole,
+  )
+
+  router.get(
+    '/all-users',
+    IPLimiter(1, 5, 'allUsers'),
+    globalTrafficLimiter(1, 300, 'allUsers'),
+    sanitiserMiddleware(
+      'headers',
+      verifyJWTSchema,
+      (req: Request, parsedData: z.infer<typeof verifyJWTSchema>) => {
+        req.validatedData = parsedData
+      },
+    ),
+    verifyJWT,
+    requireRole('admin'),
+    sanitiserMiddleware(
+      'query',
+      paginationSchema,
+      (req: Request, parsedData: z.infer<typeof paginationSchema>) => {
+        req.validatedData = parsedData
+      },
+    ),
+    getAllUsers,
   )
 
   return router
