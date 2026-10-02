@@ -12,6 +12,7 @@ CREATE TABLE users (
 	role TEXT NOT NULL DEFAULT 'user' CHECK(role IN ('user', 'admin')),
 
 	totp_enabled BOOLEAN NOT NULL DEFAULT false,
+	totp_secret TEXT,
 
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT now() 

@@ -12,6 +12,7 @@ const envSchema = z.object({
   SMTP_PORT: z.coerce.number().default(587),
   SMTP_USER: z.string().nonempty(),
   SMTP_PASSWORD: z.string().nonempty(),
+  APP_NAME: z.string().nonempty(),
 })
 
 export const env = envSchema.parse(process.env)

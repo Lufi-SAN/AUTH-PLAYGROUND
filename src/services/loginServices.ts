@@ -6,6 +6,7 @@ import { redis, type MyRedisClientType } from '../loaders/loadRedis.js'
 import { SignJWT } from 'jose'
 import { getActiveKid, getSigningKey } from './keyStore.js'
 import * as crypto from 'crypto'
+import { verify } from 'otplib'
 
 interface UserInfo {
   userId: string
@@ -38,6 +39,7 @@ async function getUserDetailsWithUsername(username: string) {
     userId: result.userId,
     passwordHash: result.passwordHash,
     role: result.role,
+    totpSecret: result.totpSecret,
   }
 }
 
@@ -93,19 +95,37 @@ export async function createAccessToken(
 export async function loginUserOrchestrator(
   username: string,
   password: string,
+  code?: string,
 ) {
-  const { userId, passwordHash, role } =
+  const { userId, passwordHash, role, totpSecret } =
     await getUserDetailsWithUsername(username)
   const userInfo = { userId, role }
+
   const doesPasswordMatch = await verifyPassword(password, passwordHash)
   if (!doesPasswordMatch) {
     throw new UserNotFoundError('User not found: Password does not match')
   }
+
+  if (code) {
+    if (!totpSecret) {
+      throw new UserNotFoundError('User not found: TOTP secret not found')
+    } else {
+      const verification = await verify({
+        secret: totpSecret,
+        token: code,
+      })
+      if (!verification.valid) {
+        throw new UserNotFoundError('User not found: Invalid TOTP code')
+      }
+    }
+  }
+
   const refreshToken = createRefreshToken()
   const refreshTokenHash = crypto
     .createHash('sha256')
     .update(refreshToken)
     .digest('hex')
+
   const sessionId = `sid-${crypto.randomBytes(32).toString('hex')}`
   const SESSION_KEY = redisKeys.session(sessionId)
   const SESSION_INDEX_KEY = redisKeys.sessionIndex(userId)

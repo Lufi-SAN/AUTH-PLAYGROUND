@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from '../../types/user.types.js'
 import { loginUserOrchestrator } from '../../services/loginServices.js'
 import { successResponse } from '../../utils/UTILS_SINK.js'
+import type { LoginSchema } from '../routes/schemas/login_schema.js'
 
 export async function loginUser(
   req: Request,
@@ -8,13 +9,10 @@ export async function loginUser(
   next: NextFunction,
 ) {
   try {
-    const { username, password } = req.validatedData as {
-      username: string
-      password: string
-    }
+    const { username, password, code } = req.validatedData as LoginSchema
 
     const { accessToken, refreshToken, sessionId } =
-      await loginUserOrchestrator(username, password)
+      await loginUserOrchestrator(username, password, code)
 
     const cookieOptions = {
       httpOnly: true,

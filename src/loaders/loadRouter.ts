@@ -1,6 +1,5 @@
 import { Router } from 'express'
 import {
-  verificationMethodRouter,
   registerRouter,
   verifyEmailRouter,
   resendLinkRouter,
@@ -9,6 +8,7 @@ import {
   changePasswordRouter,
   logoutRouter,
   authRouter,
+  totpRouter,
 } from '../api/routes/ROUTER_SINK.js'
 
 export function loadRouter() {
@@ -16,6 +16,7 @@ export function loadRouter() {
 
   router.use('/auth', authRouter())
   router.use('/register', registerRouter())
+  router.use('/totp', totpRouter())
   router.use('/verify-email', verifyEmailRouter())
   router.use('/resend-verification', resendLinkRouter())
   router.use('/login', loginRouter())
