@@ -6,22 +6,15 @@ import { DatabaseError } from 'pg'
 import { UserAlreadyExistsError } from '../errors/AppErrors.js'
 import { redis } from '../loaders/loadRedis.js'
 import { enqueueOTPEmailJob } from '../jobs/enqueueOTPEmailJob.js'
-import type { VerificationStrategy } from '../types/user.types.js'
 import type { MyRedisClientType } from '../loaders/loadRedis.js'
 
 async function saveNewUser(
   username: string,
   email: string,
   passwordHash: string,
-  verificationStrategy: VerificationStrategy,
 ) {
   try {
-    const newUserData = await saveNewUserDB(
-      username,
-      email,
-      passwordHash,
-      verificationStrategy,
-    )
+    const newUserData = await saveNewUserDB(username, email, passwordHash)
     return newUserData
   } catch (error) {
     if (error instanceof DatabaseError && error.code === '23505') {
@@ -59,29 +52,21 @@ export async function registerUserOrchestrator(
   password: string,
   username: string,
   email: string,
-  verificationStrategy: VerificationStrategy,
 ): Promise<{ id: string; username: string; email: string } | undefined> {
   const passwordHash = await createPasswordHash(password)
 
   //service for db
-  const newUserData = await saveNewUser(
-    username,
-    email,
-    passwordHash,
-    verificationStrategy,
-  )
+  const newUserData = await saveNewUser(username, email, passwordHash)
 
-  if (verificationStrategy === 'emailVerification') {
-    const otp = generateSecure14DigitString()
+  const otp = generateSecure14DigitString()
 
-    const redisInstance = redis.getRedisInstance()
-    const redisKey = redisKeys.emailVerificationOTP(otp)
-    //service for redis
-    await redisOTPKeySetup(redisInstance, redisKey, email)
+  const redisInstance = redis.getRedisInstance()
+  const redisKey = redisKeys.emailVerificationOTP(otp)
+  //service for redis
+  await redisOTPKeySetup(redisInstance, redisKey, email)
 
-    //service for email queue
-    await sendOTPEmail(email, otp)
+  //service for email queue
+  await sendOTPEmail(email, otp)
 
-    return newUserData
-  }
+  return newUserData
 }

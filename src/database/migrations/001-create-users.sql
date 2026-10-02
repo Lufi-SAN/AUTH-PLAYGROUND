@@ -11,7 +11,7 @@ CREATE TABLE users (
 
 	role TEXT NOT NULL DEFAULT 'user' CHECK(role IN ('user', 'admin')),
 
-	verification_strategy TEXT NOT NULL DEFAULT 'emailVerification' CHECK(verification_strategy IN ('emailVerification', 'totp', 'webauthn')),
+	totp_enabled BOOLEAN NOT NULL DEFAULT false,
 
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT now() 

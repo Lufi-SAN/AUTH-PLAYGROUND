@@ -1,5 +1,4 @@
 import { appConfig } from './config/app.js'
-import { setupAppState } from './lifecycle/appState.js'
 import {
   loadPostgres,
   loadRedis,
@@ -13,7 +12,6 @@ import { scheduleCronJobs } from './jobs/cronjobs.js'
 import { initializeKeysStore } from './services/keyManager.js'
 
 async function startServer() {
-  setupAppState()
   const pg = await loadPostgres()
   const redis = await loadRedis()
   const mailer = await loadMailer()

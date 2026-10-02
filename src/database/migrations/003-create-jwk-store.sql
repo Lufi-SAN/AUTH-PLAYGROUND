@@ -11,6 +11,6 @@ CREATE TABLE jwk_store(
     rotation_period TEXT NOT NULL UNIQUE,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-)
+);
 
 CREATE UNIQUE INDEX one_active_jwk ON jwk_store(status) WHERE status = 'active';

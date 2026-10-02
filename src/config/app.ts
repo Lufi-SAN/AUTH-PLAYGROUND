@@ -4,5 +4,4 @@ export const appConfig = {
   port: env.PORT,
   nodeEnv: env.NODE_ENV,
   appDomain: env.APP_DOMAIN,
-  verificationStrategy: env.DEFAULT_VERIFICATION_STRATEGY,
 }

@@ -12,9 +12,6 @@ const envSchema = z.object({
   SMTP_PORT: z.coerce.number().default(587),
   SMTP_USER: z.string().nonempty(),
   SMTP_PASSWORD: z.string().nonempty(),
-  DEFAULT_VERIFICATION_STRATEGY: z
-    .enum(['emailVerification', 'totp', 'webauthn'])
-    .default('emailVerification'),
 })
 
 export const env = envSchema.parse(process.env)
