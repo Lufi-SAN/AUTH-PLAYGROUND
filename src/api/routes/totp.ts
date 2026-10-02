@@ -8,7 +8,7 @@ import {
 import type { Request } from '../../types/user.types.js'
 import { z } from 'zod'
 import { verifyJWT } from '../middleware/verifyJWT.js'
-import { enrollTotp } from '../controllers/enrollTotpController.js'
+import { enrollTotp } from '../controllers/totpController.js'
 import { verifyTotp } from '../controllers/verifyTotpController.js'
 
 export function totpRouter() {
