@@ -27,7 +27,7 @@ export async function insertNewActiveRowIfNecessaryDB(updateData: UpdateData) {
     //So process A completes & when other processes can now act they will only go down data recovery NOT data creation
 
     const existing = await client.query(
-      `SELECT kid, private_jwk, public_jwk, rotation_period FROM jwk_store WHERE rotation_period = $1`,
+      `SELECT kid, private_jwk, public_jwk, rotation_period FROM jwk_store WHERE rotation_period = $1 AND status = 'active'`,
       [rotationPeriod],
     )
     if (existing.rowCount && existing.rowCount > 0) {
@@ -50,7 +50,7 @@ export async function insertNewActiveRowIfNecessaryDB(updateData: UpdateData) {
     return newRow.rows[0]
   } catch (error) {
     console.error(
-      'Transaction at insertActiveRowIfNecessary function failed:',
+      'Transaction at insertActiveRowIfNecessaryDB function failed:',
       error,
     )
 

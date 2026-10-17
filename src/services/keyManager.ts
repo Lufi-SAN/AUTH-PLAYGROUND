@@ -1,3 +1,4 @@
+import { appConfig } from '../config/app.js'
 import { generateKeyPair, exportJWK, importJWK } from 'jose'
 import { randomUUID } from 'crypto'
 import { redisKeys } from '../config/redis.js'
@@ -11,6 +12,15 @@ import {
 import { insertNewActiveRowIfNecessaryDB } from '../repositories/keyManagementRepo.js'
 
 let lastRotatedPeriod: string | null = null
+
+function rotationPeriod(date: string) {
+  const period = appConfig.keyRotation
+  if (period === 'daily') {
+    return date.slice(0, 10)
+  } else {
+    return date.slice(0, 7)
+  }
+}
 
 export async function createAndExportKeys() {
   const { privateKey, publicKey } = await generateKeyPair('EdDSA', {
@@ -48,7 +58,7 @@ export async function initializeKeysStore() {
 
   const now = new Date()
   const nowToString = now.toISOString()
-  const currentRotationPeriod = nowToString.slice(0, 10)
+  const currentRotationPeriod = rotationPeriod(nowToString)
 
   const activeKid = await redisInstance.get(KEY_FOR_ACTIVE_KID_POINTER) //returns "567-829-efrg"
 
@@ -110,14 +120,25 @@ export async function initializeKeysStore() {
       inMemoryKeysStore(privateKey, publicKey, kid as string)
     } else {
       //Check if within rotation grace limit & leave to cron rotation job
-      const [monthStartTime, monthGraceTime] = [
-        Date.UTC(now.getFullYear(), now.getMonth(), 1, 0, 0),
-        Date.UTC(now.getFullYear(), now.getMonth(), 1, 0, 14),
-      ]
-      const currentTime = now.getTime()
-      if (monthStartTime <= currentTime && currentTime <= monthGraceTime) {
-        //Let cron handle it
-        return
+      if (appConfig.keyRotation === 'daily') {
+        const [dayStartTime, dayGraceTime] = [
+          Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0),
+          Date.UTC(now.getFullYear(), now.getMonth(), now.getDay(), 0, 14),
+        ]
+        const currentTime = now.getTime()
+        if (dayStartTime <= currentTime && currentTime <= dayGraceTime) {
+          return
+        }
+      } else {
+        const [monthStartTime, monthGraceTime] = [
+          Date.UTC(now.getFullYear(), now.getMonth(), 1, 0, 0),
+          Date.UTC(now.getFullYear(), now.getMonth(), 1, 0, 14),
+        ]
+        const currentTime = now.getTime()
+        if (monthStartTime <= currentTime && currentTime <= monthGraceTime) {
+          //Let cron handle it
+          return
+        }
       }
 
       //Check Postgres
@@ -161,7 +182,7 @@ export async function initializeKeysStore() {
 }
 
 export async function rotateKeys() {
-  const currentMY = new Date().toISOString().slice(0, 10) // e.g. "2024-06-01"
+  const currentMY = rotationPeriod(new Date().toISOString()) // e.g. "2024-06-01"
 
   const KEY_FOR_JWT_TRACKING = redisKeys.jwkTracker()
 
