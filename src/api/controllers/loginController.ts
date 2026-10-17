@@ -9,7 +9,11 @@ export async function loginUser(
   next: NextFunction,
 ) {
   try {
-    const { username, password, code } = req.validatedData as LoginSchema
+    const {
+      username,
+      password,
+      totpCode: code,
+    } = req.validatedData as LoginSchema
 
     const { accessToken, refreshToken, sessionId } =
       await loginUserOrchestrator(username, password, code)
