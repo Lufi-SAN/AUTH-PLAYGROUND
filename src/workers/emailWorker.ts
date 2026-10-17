@@ -10,13 +10,13 @@ export function createEmailWorker() {
     async (job) => {
       console.log(`Worker: ${job}`)
       const transporter = mailer.getTransporterInstance()
-      const { email, otp } = job.data
+      const { email, otp, type } = job.data
       try {
         const info = await transporter.sendMail({
           from: '"Auth Playground" <onboarding@resend.dev>',
           to: email,
           subject: 'Your OTP Code',
-          html: `<h1>Hello! Here's your OTP Code. Made easy through a verification link </h1><p>Click here: <a href="${appConfig.appDomain}/verify-email/${otp}">Verify Email</a></p>`,
+          html: `<h1>Hello! Here's your OTP Code. Made easy through a verification link </h1><p>Click here: <a href="${appConfig.appDomain}/verify-email/${otp}/${type}">Verify Email</a></p>`,
         })
 
         console.log(`${appConfig.appDomain}/verify-email/${otp}`)

@@ -13,7 +13,7 @@ export function verifyEmailRouter() {
   const router = Router()
 
   router.get(
-    '/:otp',
+    '/:otp/:type',
     IPLimiter(1, 10, 'verifyEmail'),
     globalTrafficLimiter(1, 100, 'verifyEmail'),
     sanitiserMiddleware(

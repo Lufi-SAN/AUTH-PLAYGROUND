@@ -9,6 +9,7 @@ import {
   logoutRouter,
   authRouter,
   totpRouter,
+  changeEmailRouter,
 } from '../api/routes/ROUTER_SINK.js'
 
 export function loadRouter() {
@@ -22,7 +23,7 @@ export function loadRouter() {
   router.use('/login', loginRouter())
   router.use('/refresh', refreshRouter())
   router.use('/change-password', changePasswordRouter())
-  // router.use('/change-email')
+  router.use('/change-email', changeEmailRouter())
   // router.use('/delete-account')
   router.use('/logout', logoutRouter())
 

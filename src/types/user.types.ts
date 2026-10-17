@@ -42,3 +42,5 @@ export type {
   UserJWTPayload,
   UserSessionData,
 } from '../services/loginServices.js'
+
+export type verifyEmailType = 'register' | 'reset-password' | 'change-email'

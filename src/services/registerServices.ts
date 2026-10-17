@@ -7,6 +7,7 @@ import { UserAlreadyExistsError } from '../errors/AppErrors.js'
 import { redis } from '../loaders/loadRedis.js'
 import { enqueueOTPEmailJob } from '../jobs/enqueueOTPEmailJob.js'
 import type { MyRedisClientType } from '../loaders/loadRedis.js'
+import type { verifyEmailType } from '../types/user.types.js'
 
 async function saveNewUser(
   username: string,
@@ -31,21 +32,27 @@ async function saveNewUser(
 export async function redisOTPKeySetup(
   redisInstance: MyRedisClientType,
   redisKey: string,
-  email: string,
+  currentEmail: string,
+  newEmail: string | null = null,
 ) {
   await redisInstance
     .multi()
     .hset(redisKey, {
-      email,
+      current_email: currentEmail,
+      new_email: newEmail,
     })
     .expire(redisKey, 15 * 60)
     .exec()
 }
 
-export async function sendOTPEmail(email: string, otp: string) {
+export async function sendOTPEmail(
+  email: string,
+  otp: string,
+  type: verifyEmailType = 'register',
+) {
   // Implement email sending logic here using your preferred email service provider
   // For example, you can use nodemailer or any transactional email service API
-  await enqueueOTPEmailJob(email, otp)
+  await enqueueOTPEmailJob(email, otp, type)
 }
 
 export async function registerUserOrchestrator(
@@ -66,7 +73,7 @@ export async function registerUserOrchestrator(
   await redisOTPKeySetup(redisInstance, redisKey, email)
 
   //service for email queue
-  await sendOTPEmail(email, otp)
+  await sendOTPEmail(email, otp, 'register')
 
   return newUserData
 }
