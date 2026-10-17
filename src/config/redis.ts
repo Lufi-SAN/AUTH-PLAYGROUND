@@ -11,6 +11,7 @@ export const REDIS_PREFIXES = {
   JWK_STORE: 'jwk:keys:', //Hash for storing jwk details. TTL applied when rotated out e.g. jwk:keys:567829efrg
   KID_POINTER: 'jwk:active_kid', //String points at active kid e.g. jwk:active_keyPair "567829efrg"
   JWK_TRACKER: 'jwk:active_key_list',
+  EMAIL_CHANGE_VERIFICATION_OTP: 'email_change_verification_otp:', //Hash for storing otp details for email change
 } as const
 
 export const redisKeys = {
@@ -21,6 +22,8 @@ export const redisKeys = {
   jwkStore: (kid: string) => `${REDIS_PREFIXES.JWK_STORE}${kid}`, //e.g. jwk:keys:567829efrg
   kidPointer: () => `${REDIS_PREFIXES.KID_POINTER}`,
   jwkTracker: () => `${REDIS_PREFIXES.JWK_TRACKER}`,
+  emailChangeVerificationOTP: (otp: string) =>
+    `${REDIS_PREFIXES.EMAIL_CHANGE_VERIFICATION_OTP}${otp}:email_change`,
 }
 
 export type RedisKeys = typeof redisKeys

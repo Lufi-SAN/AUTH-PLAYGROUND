@@ -13,6 +13,7 @@ const envSchema = z.object({
   SMTP_USER: z.string().nonempty(),
   SMTP_PASSWORD: z.string().nonempty(),
   APP_NAME: z.string().nonempty(),
+  KEY_ROTATION: z.enum(['daily', 'monthly']),
 })
 
 export const env = envSchema.parse(process.env)

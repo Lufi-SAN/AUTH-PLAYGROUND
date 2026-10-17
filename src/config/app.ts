@@ -5,4 +5,5 @@ export const appConfig = {
   nodeEnv: env.NODE_ENV,
   appDomain: env.APP_DOMAIN,
   appName: env.APP_NAME,
+  keyRotation: env.KEY_ROTATION,
 }
